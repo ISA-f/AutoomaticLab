@@ -229,21 +229,24 @@ class LcardE440_Autoread(Abstract_Device.Device):
                 previous_syncd = self.syncd()
                 time.sleep(self.ThreadSleepTime) # ожидаем заполнения следующего полубуффера
             else:
-                first_half = (previous_syncd <= half_buffer)
-                print("End of sleep", self.syncd(), " - ", previous_syncd)
-                x = e440.GetDataADC(self.adcPar.t3, self.plDescr, # считываем буффер с Lcard
+                CurrentTime = time.time()
+                current_syncd = syncd()
+                x = e440.GetDataADC(self.adcPar.t3, self.plDescr, # считываем буфер с Lcard
                                     self.data_ptr, self.buffer_size) 
-                
-                PreviousTime = ComputerTime #будем заносить время в измерения
-                ComputerTime = time.time()
+
+                print("End of sleep", current_syncd, " - ", previous_syncd)
+                PreviousBufferEndTime = CurrentBufferEndTime #будем заносить время в измерения
+                first_half = (previous_syncd <= half_buffer)
                 if(first_half):
-                        df = x[0][:half_buffer] # выбираем нужный полубуффер
+                        df = x[0][:half_buffer] # выбираем нужный полубуфер
+                        CurrentBufferEndTime = PreviousBufferEndTime + (CurrentTime - PreviousBufferEndTime)*65536/current_syncd
                 else:
                         df = x[0][half_buffer:]
+                        CurrentBufferEndTime = PreviousBufferEndTime + (CurrentTime - PreviousBufferEndTime)*65536/(current_syncd + 65536)
                 #self.rawData.append(df)
                 df = df.reshape(-1, half_buffer//self.DotsPerHalfBuffer)
                 DataPiece = np.concatenate(( # DataPiece - те данные, что мы будем сохранять
-                    np.linspace(PreviousTime, ComputerTime, self.DotsPerHalfBuffer).reshape(1,-1),
+                    np.linspace(PreviousBufferEndTime, CurrentBufferEndTime, self.DotsPerHalfBuffer).reshape(1,-1),
                     np.array([np.min(df, axis = 1),
                               np.max(df, axis = 1), # вычисляем нужные характеристики
                               np.mean(df, axis = 1),
@@ -265,7 +268,7 @@ class LcardE440_Autoread(Abstract_Device.Device):
 
                 self._MeasurementsFile.write(b"\n")
                 np.savetxt(self._MeasurementsFile, DataPiece) # сохраняем данные в объекте файла
-                if(NextSaveTime <= ComputerTime):
+                if(NextSaveTime <= CurrentTime):
                     self._MeasurementsFile.flush() # периодически отправляем новые данные в оперативку
                     NextSaveTime = ComputerTime + self.SavePeriodTime
                 # иногда в основном потоке нужно вызывать os.fsync()
