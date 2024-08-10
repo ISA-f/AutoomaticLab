@@ -294,6 +294,11 @@ class LcardE440_Autoread(Abstract_Device.Device):
         self.myThread = None
         return
 
+    def ReadFlashBuffer(self):
+        x = e440.GetDataADC(self.adcPar.t3, self.plDescr, # считываем буфер с Lcard
+                                    self.data_ptr, self.buffer_size)
+        return x, self.syncd()
+
     def GetDeviceParameters(self):
         self.DeviceParameters = [
             DeviceParameter(self, "ThreadSleepTime", is_settable = (lambda dev, val: val>0),
