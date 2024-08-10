@@ -302,7 +302,7 @@ class LcardE440_Autoread(Abstract_Device.Device):
    def ReadFlashDataAveraged(self, n, DotsPerNValues, time_gap = 0.02):
        x = e440.GetDataADC(self.adcPar.t3, self.plDescr, self.data_ptr, self.buffer_size)
        Time = time.time()
-       df = x[0][(self.syncd()-1-n):(self.syncd()-1)]
+       df = x[0][max(self.syncd()-1-n, 0):(self.syncd()-1)]
        df = df.reshape(-1, n//DotsPerNValues)
        return np.concatenate([
               np.linspace(Time - time_gap, Time, DotsPerNValues), 
