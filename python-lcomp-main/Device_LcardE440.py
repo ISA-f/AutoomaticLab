@@ -161,7 +161,7 @@ class LcardE440_Autoread(Abstract_Device.Device):
         self.ldev.CloseLDevice()
         return
     
-    def LoadConfiguration(self):
+    def LoadConfiguration(self, hotfix = False):
         f = open(self.ConfigFilename)
         config = configparser.ConfigParser()
         config.read_file(f)
@@ -191,9 +191,15 @@ class LcardE440_Autoread(Abstract_Device.Device):
                        
         self.adcPar.t3.AdChannel = ADCpar.getint("AdChannel")     # 0
         self.adcPar.t3.AdPorog = ADCpar.getint("AdPorog")         # 0
-        self.adcPar.t3.NCh = ADCpar.getint("NCh")                 # 1 - 16
 
-        self.adcPar.t3.Chn[0] = e440.CH_0 | e440.V10000 | e440.dCH_TYPE[ADCpar["Ch0Mode"]]
+        if not(hotfix):
+          self.adcPar.t3.NCh = ADCpar.getint("NCh")               # 1 - 16
+          self.adcPar.t3.Chn[0] = e440.CH_0 | e440.V10000 | e440.dCH_TYPE[ADCpar["Ch0Mode"]]
+        else:
+          self.adcPar.t3.NCh = 2
+          self.adcPar.t3.Chn[0] = e440.CH_0 | e440.V10000 | e440.dCH_TYPE[ADCpar["Ch0Mode"]]
+          self.adcPar.t3.Chn[0] = e440.CH_1 | e440.V2500 | e440.dCH_TYPE[ADCpar["Ch0Mode"]]
+        
         # adcPar.t3.Chn[1] = e140.CH_1 | e140.V2500         # e440.CH_1 | e440.V2500    e154.CH_1 | e154.V1600
         # adcPar.t3.Chn[2] = e140.CH_2 | e140.V0625         # e440.CH_2 | e440.V0625    e154.CH_2 | e154.V0500
         # adcPar.t3.Chn[3] = e140.CH_3 | e140.V0156         # e440.CH_3 | e440.V0156    e154.CH_3 | e154.V0160
@@ -304,12 +310,18 @@ class LcardE440_Autoread(Abstract_Device.Device):
        Time = time.time()
        df = x[0][max(self.syncd()-1-n, 0):(self.syncd()-1)]
        df = df.reshape(-1, n//DotsPerNValues)
+       df2 = x[1][max(self.syncd()-1-n, 0):(self.syncd()-1)]
+       df2 = df2.reshape(-1, n//DotsPerNValues)
        return np.concatenate([
               np.linspace(Time - time_gap, Time, DotsPerNValues), 
               np.mean(df, axis=1),
               np.var(df, axis=1), 
               np.min(df, axis=1), 
-              np.max(df, axis=1)])
+              np.max(df, axis=1),
+              np.mean(df2, axis=1),
+              np.var(df2, axis=1), 
+              np.min(df2, axis=1), 
+              np.max(df2, axis=1)])
 
     def GetDeviceParameters(self):
         self.DeviceParameters = [
