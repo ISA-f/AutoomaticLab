@@ -198,7 +198,7 @@ class LcardE440_Autoread(Abstract_Device.Device):
         else:
           self.adcPar.t3.NCh = 2
           self.adcPar.t3.Chn[0] = e440.CH_0 | e440.V10000 | e440.dCH_TYPE[ADCpar["Ch0Mode"]]
-          self.adcPar.t3.Chn[0] = e440.CH_1 | e440.V2500 | e440.dCH_TYPE[ADCpar["Ch0Mode"]]
+          self.adcPar.t3.Chn[1] = e440.CH_1 | e440.V2500 | e440.dCH_TYPE[ADCpar["Ch0Mode"]]
         
         # adcPar.t3.Chn[1] = e140.CH_1 | e140.V2500         # e440.CH_1 | e440.V2500    e154.CH_1 | e154.V1600
         # adcPar.t3.Chn[2] = e140.CH_2 | e140.V0625         # e440.CH_2 | e440.V0625    e154.CH_2 | e154.V0500
