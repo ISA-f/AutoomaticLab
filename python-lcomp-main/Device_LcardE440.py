@@ -135,15 +135,11 @@ class LcardE440_Autoread(Abstract_Device.Device):
         self.MeasurementIsActive = False
         self.data_ptr = None
         self.syncd = None
-        self.__myData = Measurements_Data(np.zeros((1,7)), columns=['time','min','max','mean','var', 'linK', 'linB'])
+        self.myData = properties.MyProperty(pd.DataFrame(np.zeros((1,7)), columns=['time','min','max','mean','var', 'linK', 'linB']))
         #self.rawData = []
         self.DotsPerHalfBuffer = None
         self.SavePeriodTime = None
         return
-
-    @property
-    def myData(self):
-      return self.__myData.Data
 
     def ConnectToPhysicalDevice(self, slot: int = 0):
         self.ldev = LCOMP(slot)
