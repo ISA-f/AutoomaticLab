@@ -123,6 +123,7 @@ class adcParameterE440(DeviceParameter):
 
 
 class LcardE440_Autoread(Abstract_Device.Device):
+    myData = properties.MyProperty(None)
     def __init__(self, config_filename: str):
         super().__init__(config_filename)
         self.buffer_size = None
@@ -135,7 +136,7 @@ class LcardE440_Autoread(Abstract_Device.Device):
         self.MeasurementIsActive = False
         self.data_ptr = None
         self.syncd = None
-        self.myData = properties.MyProperty(pd.DataFrame(np.zeros((1,7)), columns=['time','min','max','mean','var', 'linK', 'linB']))
+        self.myData = pd.DataFrame(np.zeros((1,7)), columns=['time','min','max','mean','var', 'linK', 'linB'])
         #self.rawData = []
         self.DotsPerHalfBuffer = None
         self.SavePeriodTime = None
@@ -228,6 +229,7 @@ class LcardE440_Autoread(Abstract_Device.Device):
         self.ldev.StartLDevice()
         self._MeasurementsFile.write(b"time min max mean var lin1 lin2\n")
         ComputerTime = time.time()
+        PreviousBufferEndTime = ComputerTime
         NextSaveTime = ComputerTime + self.SavePeriodTime
         previous_syncd = 0
 
@@ -237,7 +239,7 @@ class LcardE440_Autoread(Abstract_Device.Device):
                 time.sleep(self.ThreadSleepTime) # ожидаем заполнения следующего полубуффера
             else:
                 CurrentTime = time.time()
-                current_syncd = syncd()
+                current_syncd = self.syncd()
                 x = e440.GetDataADC(self.adcPar.t3, self.plDescr, # считываем буфер с Lcard
                                     self.data_ptr, self.buffer_size) 
 
