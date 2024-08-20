@@ -230,6 +230,7 @@ class LcardE440_Autoread(Abstract_Device.Device):
         self._MeasurementsFile.write(b"time min max mean var lin1 lin2\n")
         ComputerTime = time.time()
         PreviousBufferEndTime = ComputerTime
+        CurrentBufferEndTime = ComputerTime
         NextSaveTime = ComputerTime + self.SavePeriodTime
         previous_syncd = 0
 
