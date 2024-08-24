@@ -27,10 +27,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, my_device='Device_LcardE440'):
         self.my_device = my_device  # Пока что подефолту, программа не тестировалась на 2010
+        self.my_confog_lcard = None
         if my_device == 'Device_LcardE440':
-            self.myLcard = LcardE440_Autoread("LcardE440.ini")
+            self.my_confog_lcard = "LcardE440.ini"
+            self.myLcard = LcardE440_Autoread(self.my_confog_lcard)
         if my_device == 'Device_LcardE2010B':
-            self.myLcard = LcardE440_Autoread("LcardE2010B.ini")
+            self.my_confog_lcard = "LcardE2010B.ini"
+            self.myLcard = LcardE440_Autoread(self.my_confog_lcard)
 
 
     def setupUi(self, MainWindow):
