@@ -1,0 +1,19 @@
+Инструкция по запуску программы для Korad и Lcard на новом оборудовании.
+
+Требования: ОС поддерживает python v > 3.8
+
+Инструкция:
+
+1. Скачать и установить python v > 3.8. 
+Например, можно отсюда https://www.python.org/downloads/ 
+
+2. Установить библиотеки для python. 
+Необходимы: pandas, numpy, matplotlib, PyQt5
+Например, можно так:
+2.1 Открыть командную строку, исполнить команды:
+2.2 pip install pandas
+2.3 pip install numpy
+2.4 pip install matplotlib
+2.5 pip install pyqt5
+
+3. Скачать проект с github ()
