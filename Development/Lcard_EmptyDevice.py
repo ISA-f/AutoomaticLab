@@ -20,7 +20,7 @@ EnableCorrection()
 StartLDevice()
 
 Всегда должны находиться в одном Thread.
-Нарушение этого правила приведет вас к синему экрану при запуске SetParametersStream
+Нарушение этого правила приводит вас к синему экрану при запуске SetParametersStream
 и 2 часам поиска ошибок без возможности дебага.
 '''
 
@@ -42,8 +42,11 @@ class LcardE2010B_EmptyDevice(object):
         self.IsThreadingOff = False
         return
 
-    def connectToPhysicalDevice(self, slot: int = 0):
+    def connectToPhysicalDevice(self, slot: int = 0):    
         print("Try connect to Lcard")
+        if self.IsConnected:
+            print("Already connected to Lcard")
+            return
         try:
             self.ldev = LCOMP(slot)
             self.ldev.OpenLDevice()
@@ -58,7 +61,7 @@ class LcardE2010B_EmptyDevice(object):
         return
 
     def disconnectFromPhysicalDevice(self):
-        if self.ldev:
+        if self.ldev and self.IsConnected:
             self.ldev.CloseLDevice()
             print("Lcard disconnected")
         self.IsConnected = False
