@@ -126,8 +126,9 @@ class FilamentAnode(object):
                 self.pushButton_stop.clicked.connect(self.FinishMeasurements)
                 QtCore.QMetaObject.connectSlotsByName(MainWindow)
                 
-
+        
         def FinishMeasurements(self):
+                print("FA::FinishMeasurements()")
                 if self.myLcard:
                         self.myLcard.FinishMeasurements()
                 if self.myKoradInterface:
@@ -162,7 +163,7 @@ class FilamentAnode(object):
                 try:
                         self.CommandTable = CommandTable(config_file = "CommandTable_example.ini",
                                                  dCommand_to_Functor = d,
-                                                 onFinish = self.FinishMeasurements)
+                                                 onFinish = self.onTableFinish)
                 except Exception as e:
                         print(e)
                         a = input()
@@ -190,8 +191,8 @@ class FilamentAnode(object):
                         print(e)
                         a = input()
                 try:
-                        print("lcard data", lcard_data.shape)
-                        print("korad data", korad_data.shape)
+                        print("\n lcard data\n", lcard_data)
+                        print("\n korad data\n", korad_data)
                         self.myDataPiece = np.concatenate([korad_data, lcard_data], axis = 0)
                         self.myData = pd.DataFrame(np.concatenate([self.myData.to_numpy(), self.myDataPiece.reshape(-1,1).T], axis = 0),
                                            columns = self.myData.columns)
@@ -261,6 +262,10 @@ class FilamentAnode(object):
                         self.myLcard.DisconnectFromPhysicalDevice()
                 except Exception as e:
                         print("Lcard, ", e)
+
+        def onTableFinish(self):
+                print("Table execution finished")
+                self.FinishMeasurements()
 
 
 
