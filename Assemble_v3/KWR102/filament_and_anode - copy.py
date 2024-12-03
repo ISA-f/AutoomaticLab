@@ -26,11 +26,11 @@ class FilamentAnode(object):
                 self.timer = None
                 self.myConstants = "Constants.ini"
                 self.LogFile = log_file
-                self.myData = pd.DataFrame(np.zeros((1,13)), columns = ['Korad_time', 'Korad_U', 'Korad_I',
+                self.myData = pd.DataFrame(np.zeros((1,17)), columns = ['Korad_time', 'Korad_U', 'Korad_I',
                                                       'Lcard_comp_time', 'Lcard_buffer_size',
                                                       'Lcard_Ch0_mean','Lcard_Ch0_var', 'Lcard_Ch0_min', 'Lcard_Ch0_max',
-                                                      'Lcard_Ch1_mean','Lcard_Ch1_var', 'Lcard_Ch1_min', 'Lcard_Ch1_max'])
-                                                      #'Lcard_synth_mean','Lcard_synth_var', 'Lcard_synth_min', 'Lcard_synth_max'])
+                                                      'Lcard_Ch1_mean','Lcard_Ch1_var', 'Lcard_Ch1_min', 'Lcard_Ch1_max',
+                                                      'Lcard_synth_mean','Lcard_synth_var', 'Lcard_synth_min', 'Lcard_synth_max'])
                 
                 if my_device == 'Device_LcardE440':
                         self.my_confog_lcard = "LcardE440.ini"
@@ -190,6 +190,8 @@ class FilamentAnode(object):
                         print(e)
                         a = input()
                 try:
+                        print("lcard data", lcard_data.shape)
+                        print("korad data", korad_data.shape)
                         self.myDataPiece = np.concatenate([korad_data, lcard_data], axis = 0)
                         self.myData = pd.DataFrame(np.concatenate([self.myData.to_numpy(), self.myDataPiece.reshape(-1,1).T], axis = 0),
                                            columns = self.myData.columns)
