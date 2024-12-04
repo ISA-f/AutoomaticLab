@@ -1,0 +1,6 @@
+CPU=i386
+name=getsyncdata
+type=CIN
+cinLibraries=wlcomp.lib
+
+!include $(CINTOOLSDIR)\ntlvsb.mak

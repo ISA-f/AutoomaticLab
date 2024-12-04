@@ -1,0 +1,30 @@
+Functions called:
+ fflush (4 times)
+ free (7 times)
+ delete (12 times)
+ strcpy (350 times)
+ delete[] (350 times)
+ new[] (350 times)
+ vsnprintf (2 times)
+ memset (5 times)
+ new (12 times)
+ SysReallocMem (623 times)
+ SysFreeMem (7165 times)
+ SysGetMem (7165 times)
+ lstrlenA (1 times)
+ lstrcpyA (4 times)
+ calloc (1 times)
+ strlen (97 times)
+ realloc (1 times)
+ strdup (1 times)
+ malloc (4 times)
+ memcpy (16 times)
+Resource types used:
+ object array (350 allocs, 1 max)
+ object (12 allocs, 12 max)
+ memory block (7172 allocs, 1873 max)
+Modules used:
+ 00400000 04/22/2008 19:20:10
+ E:\PLATY\USB\Lusbapi\CD-ROM\CD-ROM32\USB\Lusbapi\ModulesViewer\ModulesViewer.
+exe
+==========================================
