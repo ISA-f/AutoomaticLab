@@ -5,30 +5,37 @@ class DataFrame_to_Plot(object):
             self.myDataSource = DataSource
             return
     
-    def setupUi(self, MainWindow):
-            self.centralwidget = QtWidgets.QWidget(MainWindow)
-            self.centralwidget.setObjectName("centralwidget")
-
-            #Plot
-            self.myPlotWidget = QtWidgets.QWidget(self.centralwidget)
-            self.myPlotWidget.setGeometry(QtCore.QRect(700, 0, 600, 600))
+    def setupUi(self, parent = None):
+            # -- instantiations --
+            self.myPlotWidget = QtWidgets.QWidget(parent)
+            self.PlotXAxis_ComboBox = QtWidgets.QComboBox()
+            self.PlotYAxis_ComboBox = QtWidgets.QComboBox()
             self.Y_x_plot = PyplotWidget()
-            vbox = QtWidgets.QVBoxLayout()
-            vbox.addWidget(self.Y_x_plot)
-            self.myPlotWidget.setLayout(vbox)
-            self.Y_x_plot.setObjectName("Y(x) plot")
-            self.PlotXAxis_Label = QtWidgets.QLabel("X axis", self.centralwidget)
-            self.PlotXAxis_Label.setGeometry(QtCore.QRect(720, 600, 300, 50))
-            self.PlotXAxis_ComboBox = QtWidgets.QComboBox(self.centralwidget)
-            self.PlotXAxis_ComboBox.setGeometry(QtCore.QRect(800, 600, 300, 40))
-            self.PlotXAxis_ComboBox.addItems(self.myData.columns)
-            self.PlotYAxis_Label = QtWidgets.QLabel("Y axis", self.centralwidget)
-            self.PlotYAxis_Label.setGeometry(QtCore.QRect(720, 640, 300, 50))
-            self.PlotYAxis_ComboBox = QtWidgets.QComboBox(self.centralwidget)
-            self.PlotYAxis_ComboBox.setGeometry(QtCore.QRect(800, 640, 300, 40))
-            self.PlotYAxis_ComboBox.addItems(self.myData.columns)
+            # -- connections to DataSource --
+            self.PlotXAxis_ComboBox.addItems(self.myDataSource.myData.columns)
+            self.PlotYAxis_ComboBox.addItems(self.myDataSource.myData.columns)
+            # -- connections in QT --
             self.PlotXAxis_ComboBox.currentTextChanged.connect(self.updatePlot)
             self.PlotYAxis_ComboBox.currentTextChanged.connect(self.updatePlot)
+            # -- layouts --
+            hbox_x_axis = QtWidgets.QHBoxLayout()
+            hbox_x_axis.addWidget(self.PlotXAxis_Label)
+            hbox_x_axis.addWidget(self.PlotXAxis_ComboBox)
+            hbox_y_axis = QtWidgets.QHBoxLayout()
+            hbox_y_axis.addWidget(self.PlotYAxis_Label)
+            hbox_y_axis.addWidget(self.PlotYAxis_ComboBox)
+            vbox = QtWidgets.QVBoxLayout()
+            vbox.addWidget(self.Y_x_plot)
+            vbox.addLayout(hbox_y_axis)
+            vbox.addLayout(hbox_x_axis)
+            self.myPlotWidget.setLayout(vbox)
+            return
                 
-    def updatePlot(self): 
+    def updatePlot(self):
+            x_label = self.PlotXAxis_ComboBox.currentText()
+            y_label = self.PlotYAxis_ComboBox.currentText()
+            Y_x = self.myDataSource.myData[[x_label, y_label]].dropna()
+            self.Y_x_plot.update_plot(Y_x[x_label],#[max(0, Y_x.shape[0] - amount):Y_x.shape[0]],
+                                      Y_x[y_label])#[max(0, Y_x.shape[0] - amount):Y_x.shape[0]])
+            self.Y_x_plot.setAxisLabel(x_label, y_label)
             return

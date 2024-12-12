@@ -1,9 +1,8 @@
-"""
 import numpy as np
 # ------------------- Lcard imports -------------------------
 from Lcard_IF_FullBuffers import Lcard_Interface_FullBuffers
 # -------------------- GUI imports -------------------------
-from Updatable_QTCanvas import PyplotWidget
+from DataFrame_to_Plot import DataFrame_to_Plot
 from PyQt5 import QtWidgets
 
 
@@ -11,6 +10,11 @@ from PyQt5 import QtWidgets
 class Lcard_GUI_FullBuffers(object):
     def __init__(self, Lcard_Interface_FullBuffers, parent = None):
         self.myLIF_FullBuffers = Lcard_Interface_FullBuffers
+        
+    #NEEDED np.array -> pd.DataFrame
+    @property
+    def myData(self):
+        return self.myLIF_FullBuffers.myData
 
     def setupUI(self):
         self.
