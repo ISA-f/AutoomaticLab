@@ -1,0 +1,5 @@
+CPU=i386
+name=readplatadescr
+cinLibraries=wlcomp.lib
+
+!include $(CINTOOLSDIR)\ntlvsb.mak

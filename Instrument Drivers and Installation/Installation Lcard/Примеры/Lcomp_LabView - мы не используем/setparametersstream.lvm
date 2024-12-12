@@ -1,0 +1,5 @@
+CPU=i386
+name=setparametersstream
+cinLibraries=wlcomp.lib
+
+!include $(CINTOOLSDIR)\ntlvsb.mak

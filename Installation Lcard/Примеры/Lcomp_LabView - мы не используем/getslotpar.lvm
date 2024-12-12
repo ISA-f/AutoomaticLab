@@ -1,5 +1,0 @@
-CPU=i386
-name=getslotpar
-cinLibraries=wlcomp.lib
-
-!include $(CINTOOLSDIR)\ntlvsb.mak

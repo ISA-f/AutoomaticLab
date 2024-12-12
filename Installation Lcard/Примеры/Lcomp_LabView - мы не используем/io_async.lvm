@@ -1,5 +1,0 @@
-CPU=i386
-name=io_async
-cinLibraries=wlcomp.lib
-
-!include $(CINTOOLSDIR)\ntlvsb.mak
