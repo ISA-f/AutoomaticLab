@@ -13,7 +13,7 @@ from Lcard_syncdController import LcardSyncdController
 Lcard_Interface_FullBuffers continuously saves all buffers
 received from LcardDevice.
 
-Buffers are stored in Lcard_Interface_FullBuffers.myData
+Buffers are stored in Lcard_Interface_FullBuffers.myData.
 
 This interface uses LcardSyncdController to understand, when
 to read data. Data is read when each half of the buffer is full,
@@ -31,8 +31,7 @@ class Lcard_Interface_FullBuffers(object):
 
         def startFullBuffersRead(self, ThreadSleepTime):
                 self.last_syncd = self.myLcardController.myLcardDevice.syncd()
-                self.buffer_size = self.myLcardController.myLcardDevice.buffer_size
-                self.half_buffer = self.buffer_size // 2
+                self.half_buffer = self.myLcardController.myLcardDevice.buffer_size // 2
                 self.myLcardController.startController(EventListener = self.onControllerCall,
                                                        ThreadSleepTime = ThreadSleepTime)
                 return
@@ -58,6 +57,3 @@ class Lcard_Interface_FullBuffers(object):
         def finishFullBuffersRead(self):
                 self.myLcardController.finishController()
                 return
-
-        def clearData(self):
-            self.myData = np.array()

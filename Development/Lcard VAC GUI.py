@@ -1,19 +1,82 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pandas as pd
 import numpy as np
-import Updatable_QTCanvas
 from datetime import datetime
+
+import Updatable_QTCanvas
+import Lcard.Lcard_IF_FullBuffers
 
 class LcardVACPlot_Interface(object):
         def __init__(self, Lcard_device, centralwidget):
                 self.centralwidget = centralwidget
                 self._translate = QtCore.QCoreApplication.translate
-                self.myLcard = Lcard_device
                 self.IsActive = False
-                self.Data = None
-                self.ShownData_StartIndex = 0
-                self.ShownData_EndIndex = -1
-        
+                self.myLcard_IFFB = Lcard.Lcard_IF_FullBuffers.Lcard_Interface_FullBuffers(Lcard_device)
+                self.BufferUpdateTime = 0.1
+                self.PlotUpdateTime = 0.1
+                self.QTimer_PlotUpdate = QtCore.QTimer()
+                self.QTimer_PlotUpdate.timeout.connect(self._updatePlot)
+
+        def _updatePlot(self):
+            #Chosen Yaxis label
+            #Chosen Xaxis label
+            #Chosen Start and End index
+            return
+
+        def pushStartButton(self):
+            self._startVAC()
+            self.QpushButton_Start.setEnabled(False)
+            self.QpushButton_Stop.setEnabled(True)
+            
+        def pushStopButton(self):
+            self._stopVAC()
+            self.QpushButton_Start.setEnabled(False)
+            self.QpushButton_Stop.setEnabled(True)
+
+        def pushSaveButton(self):
+            s = self.QLineEdit_Save.text()
+            if not(s):
+                s = "Lcard_VAC_" + str(datetime.now()) + ".txt"
+            self._saveVAC(s)
+            return
+
+        def pushClearButton(self):
+            self.myLcard_IFFB.clearData()
+            self._updatePlot()
+            return
+
+        def _saveVAC(self, filename):
+            file = open(filename, "w+")
+            #content = str(self.Data[self.ShownData_StartIndex:self.ShownData_EndIndex])
+            content = self._getShownData()
+            file.write(content)
+            file.close()
+            return
+
+        def _startVAC(self):
+            self.myLcard_IFFB.startFullBuffersRead(self.BufferUpdateTime)
+            self.QTimer_PlotUpdate.start(self.PlotUpdateTime * 1000)
+            return
+
+        def _stopVAC(self):
+            self.myLcard_IFFB.finishFullBuffersRead();
+            self.QTimer_PlotUpdate.stop()
+            return
+
+        def _getQLineStartEndIndex(self):
+            try:
+                s_start = self.QLineEdit_ShownData_StartIndex.text()
+                s_end = self.QLineEdit_ShownData_EndIndex.text()
+                start = int(s_start)
+                end = int(s_end)
+            except Exception as e:
+                return 0, -1
+            return start, end
+
+        def _getShownData(self):
+            start, end = self._getQLineStartEndIndex()
+            return self.myLcard_IFFB.myData[start, end]
+
         def SetupUI(self):
             # --- Plot ---
                 self.myPlotWidget = QtWidgets.QWidget(self.centralwidget)
@@ -119,57 +182,3 @@ class LcardVACPlot_Interface(object):
                 self.QpushButton_Start.clicked.connect(self.pushStartButton)
                 self.QpushButton_Stop.clicked.connect(self.pushStopButton)
                 self.QpushButton_Save.clicked.connect(self.pushSaveButton)
-
-        def updatePlot(self):
-            #Chosen Yaxis label
-            #Chosen Xaxis label
-            #Chosen Start and End index
-            return
-
-        def _getQLineStartEndIndex(self):
-            try:
-                s_start = self.QLineEdit_ShownData_StartIndex.text()
-                s_end = self.QLineEdit_ShownData_EndIndex.text()
-                start = int(s_start)
-                end = int(s_end)
-            except Exception as e:
-                return 0, -1
-            return start, end
-
-        def _getShownData(self):
-            start, end = self._getQLineStartEndIndex()
-            return self.Data[start, end]
-
-        def pushStartButton(self):
-            self._startVAC()
-            self.QpushButton_Start.setEnabled(False)
-            self.QpushButton_Stop.setEnabled(True)
-            
-        def pushStopButton(self):
-            self._stopVAC()
-            self.QpushButton_Start.setEnabled(False)
-            self.QpushButton_Stop.setEnabled(True)
-
-        def pushSaveButton(self):
-            s = self.QLineEdit_Save.text()
-            if not(s):
-                s = "default_VAC_filename" + str(datetime.now()) + ".txt"
-            self._saveVAC(s)
-            return
-
-        def pushClearButton(self):
-            self.Data = None
-            return
-
-        def _saveVAC(self, filename):
-            file = open(filename, "w+")
-            content = str(self.Data[self.ShownData_StartIndex:self.ShownData_EndIndex])
-            file.write(content)
-            file.close()
-            return
-
-        def _startVAC(self):
-            return
-
-        def _stopVAC(self):
-            return
