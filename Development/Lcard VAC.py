@@ -5,10 +5,10 @@ import Updatable_QTCanvas
 from datetime import datetime
 
 class LcardVACPlot_Interface(object):
-        def __init__(self, centralwidget):
+        def __init__(self, Lcard_device, centralwidget):
                 self.centralwidget = centralwidget
                 self._translate = QtCore.QCoreApplication.translate
-                self.myLcard = None
+                self.myLcard = Lcard_device
                 self.IsActive = False
                 self.Data = None
                 self.ShownData_StartIndex = 0
@@ -51,7 +51,14 @@ class LcardVACPlot_Interface(object):
                 self.QLineEdit_ShownData_EndIndex.setStyleSheet("font: 75 18pt \"Tahoma\";")
                 self.QLineEdit_ShownData_EndIndex.setObjectName("End Index Line")
 
-                
+                self.QLabel_StartIndex = QtWidgets.QLabel("Data start index", parent = self.centralwidget)
+                self.QLabel_EndIndex = QtWidgets.QLabel("Data end index", parent = self.centralwidget)
+
+                self.QLayout_StartEndIndex = QtWidgets.QGridLayout()
+                self.QLayout_StartEndIndex.addWidget(self.QLabel_StartIndex,0,0)
+                self.QLayout_StartEndIndex.addWidget(self.QLineEdit_ShownData_StartIndex,0,1)
+                self.QLayout_StartEndIndex.addWidget(self.QLabel_EndIndex,1,0)
+                self.QLayout_StartEndIndex.addWidget(self.QLineEdit_ShownData_EndIndex,1,1)
 
             # --- Start Button ---
                 self.QpushButton_Start = QtWidgets.QPushButton(self.centralwidget)
@@ -100,6 +107,8 @@ class LcardVACPlot_Interface(object):
                 hbox_Save.addWidget(self.QLineEdit_Save)
 
                 vbox = QtWidgets.QVBoxLayout()
+                vbox.addWidget(self.myPlotWidget)
+                vbox.addLayout(self.QLayout_StartEndIndex)
                 vbox.addLayout(hbox_Start_Stop)
                 vbox.addLayout(hbox_Save)
                 vbox.addWidget(self.QpushButton_Clear)
@@ -116,6 +125,20 @@ class LcardVACPlot_Interface(object):
             #Chosen Xaxis label
             #Chosen Start and End index
             return
+
+        def _getQLineStartEndIndex(self):
+            try:
+                s_start = self.QLineEdit_ShownData_StartIndex.text()
+                s_end = self.QLineEdit_ShownData_EndIndex.text()
+                start = int(s_start)
+                end = int(s_end)
+            except Exception as e:
+                return 0, -1
+            return start, end
+
+        def _getShownData(self):
+            start, end = self._getQLineStartEndIndex()
+            return self.Data[start, end]
 
         def pushStartButton(self):
             self._startVAC()

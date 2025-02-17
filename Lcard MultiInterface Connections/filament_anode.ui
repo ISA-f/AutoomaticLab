@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>825</width>
+    <height>576</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="label_light_gray_filament">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>100</y>
+      <width>241</width>
+      <height>321</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(200, 200, 200);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_filament">
+    <property name="geometry">
+     <rect>
+      <x>234</x>
+      <y>100</y>
+      <width>91</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color:rgb(255, 255, 255)</string>
+    </property>
+    <property name="text">
+     <string>Накал</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_dark_gray_filament">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>100</y>
+      <width>241</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(134, 134, 134);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_I_filament">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>170</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>I</string>
+    </property>
+   </widget>
+   <widget class="Line" name="line_filament">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>142</y>
+      <width>241</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_A_filament">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>170</y>
+      <width>21</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>A</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdNumber_I_filament">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>170</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_B_filament">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>220</y>
+      <width>21</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>B</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_U_filament">
+    <property name="geometry">
+     <rect>
+      <x>165</x>
+      <y>220</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>U</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_mO_filament">
+    <property name="geometry">
+     <rect>
+      <x>327</x>
+      <y>270</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>mO</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_R_filament">
+    <property name="geometry">
+     <rect>
+      <x>168</x>
+      <y>270</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>R</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_W_filament">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>320</y>
+      <width>41</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>W</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_P_filament">
+    <property name="geometry">
+     <rect>
+      <x>169</x>
+      <y>320</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>P</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_K_filament">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>370</y>
+      <width>21</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>K</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_T_filament">
+    <property name="geometry">
+     <rect>
+      <x>168</x>
+      <y>370</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>T</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_dark_gray_anode">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>100</y>
+      <width>241</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(134, 134, 134);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_mA_for_Ia_anode">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>220</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>mA</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_mA_for_sigmaI">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>370</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>mA</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_mA_for_Imin_anode">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>270</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>mA</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_anode">
+    <property name="geometry">
+     <rect>
+      <x>483</x>
+      <y>100</y>
+      <width>91</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color:rgb(255, 255, 255)</string>
+    </property>
+    <property name="text">
+     <string>Анод</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Ia_anode">
+    <property name="geometry">
+     <rect>
+      <x>416</x>
+      <y>220</y>
+      <width>21</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>I</string>
+    </property>
+   </widget>
+   <widget class="Line" name="line_anode">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>142</y>
+      <width>241</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_sigmaI_anode">
+    <property name="geometry">
+     <rect>
+      <x>415</x>
+      <y>370</y>
+      <width>21</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>o</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_B_for_Ua_anode">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>170</y>
+      <width>21</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>B</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_light_gray_anode">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>100</y>
+      <width>241</width>
+      <height>321</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(200, 200, 200);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Imax_anode">
+    <property name="geometry">
+     <rect>
+      <x>417</x>
+      <y>320</y>
+      <width>21</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>I</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_mA_for_Imax_anode">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>320</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>mA</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Imin_anode">
+    <property name="geometry">
+     <rect>
+      <x>417</x>
+      <y>270</y>
+      <width>21</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>I</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Ua_anode">
+    <property name="geometry">
+     <rect>
+      <x>411</x>
+      <y>170</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 18pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>U</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_28">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>230</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 10pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>a</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_a_for_U_anode">
+    <property name="geometry">
+     <rect>
+      <x>431</x>
+      <y>180</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 10pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>a</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_30">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>280</y>
+      <width>41</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 10pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>min</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_31">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>330</y>
+      <width>41</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 10pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>max</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_32">
+    <property name="geometry">
+     <rect>
+      <x>433</x>
+      <y>380</y>
+      <width>16</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 500 10pt &quot;Tahoma&quot;;
+color: rgb(231, 76, 76)</string>
+    </property>
+    <property name="text">
+     <string>I</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_start">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>440</y>
+      <width>151</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 75 18pt &quot;Tahoma&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_stop">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>440</y>
+      <width>151</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 75 18pt &quot;Tahoma&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Stop</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdNumber_U_filament">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>220</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdNumber_R_filament">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>270</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdNumber_P_filament">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>320</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdNumber_T_filament">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>370</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdnumber_sigmaI_anode">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>370</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdnumber_Ua_anode">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>170</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdnumber_Imin_anode">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>270</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdnumber_Imax_anode">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>320</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdnumber_Ia_anode">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>220</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(59, 59, 59);
+color: rgb(255, 0, 0);</string>
+    </property>
+   </widget>
+   <zorder>label_light_gray_anode</zorder>
+   <zorder>label_light_gray_filament</zorder>
+   <zorder>label_dark_gray_filament</zorder>
+   <zorder>label_filament</zorder>
+   <zorder>label_I_filament</zorder>
+   <zorder>line_filament</zorder>
+   <zorder>label_A_filament</zorder>
+   <zorder>lcdNumber_I_filament</zorder>
+   <zorder>label_B_filament</zorder>
+   <zorder>label_U_filament</zorder>
+   <zorder>label_mO_filament</zorder>
+   <zorder>label_R_filament</zorder>
+   <zorder>label_W_filament</zorder>
+   <zorder>label_P_filament</zorder>
+   <zorder>label_K_filament</zorder>
+   <zorder>label_T_filament</zorder>
+   <zorder>label_dark_gray_anode</zorder>
+   <zorder>label_mA_for_Ia_anode</zorder>
+   <zorder>label_mA_for_sigmaI</zorder>
+   <zorder>label_mA_for_Imin_anode</zorder>
+   <zorder>label_anode</zorder>
+   <zorder>label_Ia_anode</zorder>
+   <zorder>line_anode</zorder>
+   <zorder>label_sigmaI_anode</zorder>
+   <zorder>label_B_for_Ua_anode</zorder>
+   <zorder>label_Imax_anode</zorder>
+   <zorder>label_mA_for_Imax_anode</zorder>
+   <zorder>label_Imin_anode</zorder>
+   <zorder>label_Ua_anode</zorder>
+   <zorder>label_28</zorder>
+   <zorder>label_a_for_U_anode</zorder>
+   <zorder>label_30</zorder>
+   <zorder>label_31</zorder>
+   <zorder>label_32</zorder>
+   <zorder>pushButton_start</zorder>
+   <zorder>pushButton_stop</zorder>
+   <zorder>lcdNumber_U_filament</zorder>
+   <zorder>lcdNumber_R_filament</zorder>
+   <zorder>lcdNumber_P_filament</zorder>
+   <zorder>lcdNumber_T_filament</zorder>
+   <zorder>lcdnumber_sigmaI_anode</zorder>
+   <zorder>lcdnumber_Ua_anode</zorder>
+   <zorder>lcdnumber_Imin_anode</zorder>
+   <zorder>lcdnumber_Imax_anode</zorder>
+   <zorder>lcdnumber_Ia_anode</zorder>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
