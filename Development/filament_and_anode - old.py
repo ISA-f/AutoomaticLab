@@ -18,7 +18,7 @@ from Korad_Interface import Korad_Interface
 #------------------------ Lcard imports ------------------------------------
 from Device_LcardE2010B_PeriodicCall import LcardE2010B_PeriodicCall
 
-#------------------------ Command imports ----------------------------------
+#------------------------ Other imports ----------------------------------
 from CommandTable import CommandTable
 
 

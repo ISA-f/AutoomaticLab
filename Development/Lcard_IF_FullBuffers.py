@@ -24,7 +24,7 @@ stored into Lcard_Interface_FullBuffers.myData.
 class Lcard_Interface_FullBuffers(object):
         def __init__(self, LcardDevice):
                 self.myLcardDataInterface = LDIF.LcardDataInterface(LcardDevice)
-                self.myData = np.array()
+                self.myData = None
                 self.myLcardController = LcardSyncdController(LcardDevice)
                 self.last_syncd = 0
                 self.buffer_size = 128000 # value should be set in startFullBuffersRead
@@ -46,7 +46,7 @@ class Lcard_Interface_FullBuffers(object):
                 LDIF.cropBuffer(lcard_IF = self.myLcardDataInterface,
                                 start = self.last_syncd,
                                 end = self.myLcardDataInterface.syncd)
-                if self.myData == None:
+                if not(self.myData):
                          self.myData = self.myLcardDataInterface.data
                 else:
                         self.myData = np.concatenate([self.myData,
