@@ -12,6 +12,15 @@ dstr_to_channel = {"index" : -1,
                    "channel 2" : 2,
                    "channel 3" : 3}
 
+def str_to_channel_data(data, column_name):
+    try:
+        ind = dstr_to_channel[column_name]
+        if ind == -1:
+            return np.arange(data.shape[0])
+        return data[:, ind]
+    except Exception as e:
+        return np.arange(data.shape[0])
+
 class LcardVACPlot_Interface(object):
         def __init__(self, Lcard_device, centralwidget):
                 self.centralwidget = self.centralwidget = QtWidgets.QWidget()
@@ -25,19 +34,20 @@ class LcardVACPlot_Interface(object):
 
         def _updatePlot(self):
             print("LVAC._updatePlot call")
-            #Chosen Yaxis label
-            #Chosen Xaxis label
             data = self._getShownData()
-            Y_x = self.myData[[x_label, y_label]].dropna()
-            self.Y_x_plot.update_plot(Y_x[x_label][max(0, Y_x.shape[0] - amount):Y_x.shape[0]],
-                                                Y_x[y_label][max(0, Y_x.shape[0] - amount):Y_x.shape[0]])
+            x_label, y_label = self._getQChosenAxisData()
+            Y_x = data[[x_label, y_label]].dropna()
+            self.Y_x_plot.update_plot(Y_x[x_label], Y_x[y_label])
             self.Y_x_plot.setAxisLabel(x_label, y_label)
             return
 
         def pushStartButton(self):
-            self._startVAC()
-            self.QpushButton_Start.setEnabled(False)
-            self.QpushButton_Stop.setEnabled(True)
+            try:
+                self._startVAC()
+                self.QpushButton_Start.setEnabled(False)
+                self.QpushButton_Stop.setEnabled(True)
+            except Exception as e:
+                print(e)
             
         def pushStopButton(self):
             self._stopVAC()
@@ -48,7 +58,11 @@ class LcardVACPlot_Interface(object):
             s = self.QLineEdit_Save.text()
             if not(s):
                 s = "Lcard_VAC_" + str(datetime.now()) + ".txt"
-            self._saveVAC(s)
+                s = s.replace(":","_")
+            try:
+                self._saveVAC(s)
+            except Exception as e:
+                print("_saveVAC", e)
             return
 
         def pushClearButton(self):
@@ -58,8 +72,8 @@ class LcardVACPlot_Interface(object):
 
         def _saveVAC(self, filename):
             file = open(filename, "w+")
-            #content = str(self.Data[self.ShownData_StartIndex:self.ShownData_EndIndex])
-            content = self._getShownData()
+            start, end = self._getQLineStartEndIndex()
+            content = self.myLcard_IFFB.myData[start : end]
             file.write(content)
             file.close()
             return
@@ -89,7 +103,7 @@ class LcardVACPlot_Interface(object):
         def _getQChosenAxisData(self):
             x_label = self.PlotXAxis_ComboBox.currentText()
             y_label = self.PlotYAxis_ComboBox.currentText()
-            return dstr_to_channel[x_label], dstr_to_channel[y_label]
+            return x_label, y_label
 
         def _getShownData(self):
             start, end = self._getQLineStartEndIndex()
@@ -160,7 +174,7 @@ class LcardVACPlot_Interface(object):
                 self.QpushButton_Save.setStyleSheet("font: 75 18pt \"Tahoma\";")
                 self.QpushButton_Save.setObjectName("Save")
                 self.QpushButton_Save.setText(self._translate("MainWindow", "Save as"))
-                self.QpushButton_Save.setEnabled(False)
+                self.QpushButton_Save.setEnabled(True)
             # --- Save Filename Line ---
                 self.QLineEdit_Save = QtWidgets.QLineEdit(parent = self.centralwidget)
                 self.QLineEdit_Save.setStyleSheet("font: 75 18pt \"Tahoma\";")
@@ -171,7 +185,7 @@ class LcardVACPlot_Interface(object):
                 self.QpushButton_Clear.setStyleSheet("font: 75 18pt \"Tahoma\";")
                 self.QpushButton_Clear.setObjectName("Clear")
                 self.QpushButton_Clear.setText(self._translate("MainWindow", "Clear"))
-                self.QpushButton_Clear.setEnabled(False)
+                self.QpushButton_Clear.setEnabled(True)
 
             # --- Layout ---
                 hbox_Start_Stop = QtWidgets.QHBoxLayout()

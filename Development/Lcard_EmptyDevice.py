@@ -40,6 +40,7 @@ class LcardE2010B_EmptyDevice(object):
         self.BufferMutex = Lock()
         self.SyncdMutex = Lock()
         self.IsThreadingOff = False
+        self.ListenersAmount = 0
         return
 
     def connectToPhysicalDevice(self, slot: int = 0):    
@@ -123,13 +124,14 @@ class LcardE2010B_EmptyDevice(object):
         if not(self.IsConnected):
             return
         if self.ldev:
+            print("ldev.StopLDevice() call")
             self.ldev.StopLDevice()
         self.IsActiveMeasurements = False
         return
 
     def readBuffer(self):
         if not(self.IsConnected) or not(self.IsActiveMeasurements) or self.IsThreadingOff:
-            return
+            return None, None
         self.BufferMutex.acquire()
         self.SyncdMutex.acquire()
         syncd = self.syncd()
@@ -139,7 +141,6 @@ class LcardE2010B_EmptyDevice(object):
         self.BufferMutex.release()
         return data, syncd
 
-
     def syncd(self):
         if not(self.IsConnected) or not(self.IsActiveMeasurements) or self.IsThreadingOff:
             return
@@ -147,6 +148,18 @@ class LcardE2010B_EmptyDevice(object):
         syncd = self.syncd()
         self.SyncdMutex.release()
         return syncd
+
+    def addListener(self):
+        self.ListenersAmount += 1
+        if not(self.IsActiveMeasurements):
+            self.startMeasurements()
+
+    def removeListener(self):
+        self.ListenersAmount -= 1
+        if (self.ListenersAmount <= 0) and self.IsActiveMeasurements:
+            self.finishMeasurements()
+            self.ListenersAmount = 0
+
 
 
 
