@@ -70,6 +70,8 @@ class CommandTable(object):
         return
 
     def interruptTableExecution(self):
+        if not(self.IsActiveExecution):
+            return
         self.IsActiveExecution = False
         self.myThread.join()
         self.myThread = None

@@ -3,6 +3,26 @@ import numpy as np
 import pandas as pd
 import time
 
+from enum import Enum
+class LCARD_NAMES(Enum):
+    COMP_TIME = "Lcard_time"
+    CH0MEAN = "Lcard_Ch0_Mean"
+    CH1MEAN = "Lcard_Ch1_Mean"
+    CH2MEAN = "Lcard_Ch2_Mean"
+    CH3MEAN = "Lcard_Ch3_Mean"
+    CH0STD = "Lcard_Ch0_Std"
+    CH1STD = "Lcard_Ch1_Std"
+    CH2STD = "Lcard_Ch2_Std"
+    CH3STD = "Lcard_Ch3_Std"
+    CH0MIN = "Lcard_Ch0_Min"
+    CH1MIN = "Lcard_Ch1_Min"
+    CH2MIN = "Lcard_Ch2_Min"
+    CH3MIN = "Lcard_Ch3_Min"
+    CH0MAX = "Lcard_Ch0_Max"
+    CH1MAX = "Lcard_Ch1_Max"
+    CH2MAX = "Lcard_Ch2_Max"
+    CH3MAX = "Lcard_Ch3_Max"
+
 class LcardDataInterface:
     def __init__(self, LcardDevice):
         self.myLcardDevice = LcardDevice
@@ -14,6 +34,7 @@ class LcardDataInterface:
         if not(self.myLcardDevice):
             return
         self.data, self.syncd = self.myLcardDevice.readBuffer()
+        #print("data, syncd: ", self.data, self.syncd)
         self.read_time = time.time()
 
     def free(self):
@@ -23,7 +44,9 @@ class LcardDataInterface:
         
 def calculateAverage(lcard_IF):
     if not(lcard_IF.data):
-        return [None]
+        time_sistem = time.time()
+        lcard_IF.data = pd.Series([None]*17, index = LCARD_NAMES._member_map_.values())
+        return 
     N_channels = lcard_IF.data.shape[0]
     columns = [[f"MeanCh{i}" for i in range(N_channels)], [f"StdCh{i}" for i in range(N_channels)],
               [f"MinCh{i}" for i in range(N_channels)], [f"MaxCh{i}" for i in range(N_channels)]]

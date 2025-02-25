@@ -6,16 +6,24 @@ import pandas as pd
 import serial
 from threading import Lock
 
+from enum import Enum
+class KORAD_NAMES(Enum):
+    KORAD_TIME = "Korad_time"
+    VOLTAGE = "Korad_U"
+    CURRENT = "Korad_I"
+
 class Korad(Device):
 
     type = "Korad"
 
     def __init__(self, config_filename:str):
         super().__init__(config_filename)
-        self.myData = pd.DataFrame(columns = ['time', 'U', 'I'])
         self.DeviceParameters = []
         self.ser = None
         self.mutex = Lock()
+
+        self.myData = pd.DataFrame(columns = ['time', 'U', 'I']) # unused
+        # unused but left for compatability
 
     def StartExperiment(self):
         if self.ser == None:
@@ -37,8 +45,9 @@ class Korad(Device):
     
     def TakeMeasurements(self):
         if self.ser == None:
+            time_sistem = time.time()
             print("Korad is not connected; tried Korad.TakeMeasurements()")
-            return np.array([None, None, None], dtype = object)
+            return pd.Series([time_sistem, None, None],index = KORAD_NAMES._member_map_.values())
 
         self.mutex.acquire()
         #self.ser.write(b'\r')
@@ -48,8 +57,7 @@ class Korad(Device):
         current = float(self.ser.readline().decode()[:-1])
         self.mutex.release()
         time_sistem = time.time()
-        DataPiece = np.array([time_sistem, voltage, current])
-        return DataPiece
+        return pd.Series([time_sistem, voltage, current],index = KORAD_NAMES._member_map_.values())
 
     def Set_v_i(self,v=None,i=None):
         if self.ser == None:
@@ -76,8 +84,9 @@ class Korad(Device):
 
     def DisconnectFromPhysicalDevice(self):
         self.FinishExperiment()
-        self.ser.close()
-        self.ser = None
+        if self.ser:
+            self.ser.close()
+            self.ser = None
 
     def LoadConfiguration(self):
         config = configparser.ConfigParser()

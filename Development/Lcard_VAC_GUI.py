@@ -22,8 +22,8 @@ def str_to_channel_data(data, column_name):
         return np.arange(data.shape[0])
 
 class LcardVACPlot_Interface(object):
-        def __init__(self, Lcard_device, centralwidget):
-                self.centralwidget = self.centralwidget = QtWidgets.QWidget()
+        def __init__(self, Lcard_device):
+                self.centralwidget = QtWidgets.QWidget()
                 self._translate = QtCore.QCoreApplication.translate
                 self.IsActive = False
                 self.myLcard_IFFB = Lcard_IF_FullBuffers.Lcard_Interface_FullBuffers(Lcard_device)
@@ -118,6 +118,7 @@ class LcardVACPlot_Interface(object):
                 vbox_plot = QtWidgets.QVBoxLayout()
                 vbox_plot.addWidget(self.Y_x_plot)
                 self.myPlotWidget.setLayout(vbox_plot)
+                self.myPlotWidget.setGeometry(0,0,1000,1000)
                 self.Y_x_plot.setObjectName("Y(x) plot")
 
                 self.PlotXAxis_Label = QtWidgets.QLabel("X axis", self.centralwidget)
@@ -221,7 +222,7 @@ if __name__ == "__main__":
     import sys 
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = LcardVACPlot_Interface(None, None)
+    ui = LcardVACPlot_Interface(None)
     LVACwidget = ui.setupUI()
     MainWindow.setCentralWidget(LVACwidget)
     MainWindow.show()
