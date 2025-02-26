@@ -166,21 +166,32 @@ class LcardE2010B_EmptyDevice(object):
             self.finishMeasurements()
             self.ListenersAmount = 0
 
+    def __del__(self):
+        self.disconnectFromPhysicalDevice()
+        return
 
 
+def test():
+    print("LcardE2010B EmptyDevice test")
+    myLcard = LcardE2010B_EmptyDevice("LcardE2010B.ini")
+    myLcard.connectToPhysicalDevice(slot=0)
+    myLcard.loadConfiguration()
+        
+    myLcard.startMeasurements()
+    data, syncd = myLcard.readBuffer()
+    time.sleep(3)
+    data, syncd = myLcard.readBuffer()
+    myLcard.finishMeasurements()
+    myLcard.disconnectFromPhysicalDevice()
+    if data is None:
+        return
+    print(">> data.shape, syncd:",data.shape, syncd)
+    return
 
 if __name__ == "__main__":
-        myLcard = LcardE2010B_EmptyDevice("LcardE2010B.ini")
-        myLcard.connectToPhysicalDevice(slot=0)
-        myLcard.loadConfiguration()
-        
-        myLcard.startMeasurements()
-        data, syncd = myLcard.readBuffer()
-        print(data.shape, syncd)
-        time.sleep(3)
-        data, syncd = myLcard.readBuffer()
-        print(data.shape, syncd)
-        myLcard.finishMeasurements()
-        myLcard.disconnectFromPhysicalDevice()
+    try:
+        test()
+    except Exception as e:
+        print(">>",e)
 
 

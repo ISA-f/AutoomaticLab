@@ -30,7 +30,10 @@ class Lcard_Interface_FullBuffers(object):
                 self.buffer_size = 128000 # value should be set in startFullBuffersRead
 
         def startFullBuffersRead(self, ThreadSleepTime):
-                self.last_syncd = self.myLcardController.myLcardDevice.syncd()
+                self.myLcardDataInterface.readBuffer()
+                self.last_syncd = self.myLcardDataInterface.syncd
+                if self.myLcardController.myLcardDevice is None:
+                        return
                 self.buffer_size = self.myLcardController.myLcardDevice.buffer_size
                 self.half_buffer = self.buffer_size // 2
                 self.myLcardController.startController(EventListener = self.onControllerCall,
@@ -61,3 +64,29 @@ class Lcard_Interface_FullBuffers(object):
 
         def clearData(self):
             self.myData = np.array()
+
+
+def test():
+    print("Lcard_IF_FullBuffers test")
+    import Lcard_EmptyDevice
+    lcard = Lcard_EmptyDevice.LcardE2010B_EmptyDevice("LcardE2010B.ini")
+    lcard.connectToPhysicalDevice()
+    lcard.loadConfiguration()
+    lcard.startMeasurements()
+    
+    LcardIFFB = Lcard_Interface_FullBuffers(lcard)
+    LcardIFFB.startFullBuffersRead(ThreadSleepTime = 1)
+    time.sleep(5)
+    LcardIFFB.finishFullBuffersRead()
+
+    lcard.finishMeasurements()
+    lcard.disconnectFromPhysicalDevice()
+
+if __name__ == "__main__":
+    try:
+        test()
+        print(">> success")
+        print()
+    except Exception as e:
+        print(">>", e)
+        a = input()

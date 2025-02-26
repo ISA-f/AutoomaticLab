@@ -143,7 +143,7 @@ class FilamentAnodeTab(object):
                 self.timer.start(20)
 
         def update_filament_anode(self):
-                print("update filament anode")
+                #print("update filament anode")
                 # receive data from Korad 
                 korad_data = self.myKorad.TakeMeasurements()
                 # receive data from Lcard
@@ -157,14 +157,14 @@ class FilamentAnodeTab(object):
                 # data processing : update synth channel
                 # Тут формулки, их желательно проверить на корректность
                 myDataPiece[["Ua", "Ia", "Imin", "sigmaI"]] = None
-                if lcard_data[LDIF.LCARD_NAMES.CH0MEAN]:
-                        myDataPiece["Ua"] = self.k1*lcard_data[LDIF.LCARD_NAMES.CH0MEAN]       # Ua = k1 <ch1>
-                if lcard_data[LDIF.LCARD_NAMES.CH0MEAN] and lcard_data[LDIF.LCARD_NAMES.CH1MEAN]:   # Ia = c1 <ch1> - c2 <ch2>
+                if LDIF.LCARD_NAMES.CH0MEAN in lcard_data.index:
+                        myDataPiece["Ua"] = self.k1*lcard_data[LDIF.LCARD_NAMES.CH0MEAN]              # Ua = k1 <ch1>
+                if {LDIF.LCARD_NAMES.CH0MEAN, LDIF.LCARD_NAMES.CH1MEAN}.issubset(lcard_data.index):   # Ia = c1 <ch1> - c2 <ch2>
                         myDataPiece["Ia"] = self.c1*lcard_data[LDIF.LCARD_NAMES.CH0MEAN] - self.c2*lcard_data[LDIF.LCARD_NAMES.CH1MEAN]
-                if lcard_data[LDIF.LCARD_NAMES.CH0MIN] and lcard_data[LDIF.LCARD_NAMES.CH1MAX]:     # Imin = c1 ch1_min - c2 ch2_max
+                if {LDIF.LCARD_NAMES.CH0MIN, LDIF.LCARD_NAMES.CH1MAX}.issubset(lcard_data.index):     # Imin = c1 ch1_min - c2 ch2_max
                         myDataPiece["Imin"] = self.c1*lcard_data[LDIF.LCARD_NAMES.CH0MIN] - self.c2*lcard_data[LDIF.LCARD_NAMES.CH1MAX]
-                if lcard_data[LDIF.LCARD_NAMES.CH0STD] and lcard_data[LDIF.LCARD_NAMES.CH1STD]:     # sigma = c1 sigma_1 - c2 sigma_2
-                        myDataPiece["sigmaI"] = self.c1*lcard_data[LDIF.LCARD_NAMES.CH0STD] - self.c2*lcard_data[LDIF.LCARD_NAMES.CH1STD]
+                if {LDIF.LCARD_NAMES.CH0STD, LDIF.LCARD_NAMES.CH1STD}.issubset(lcard_data.index):     # sigma = c1 sigma_1 - c2 sigma_2
+                        myDataPiece["sigmaI"] = np.sqrt((self.c1*lcard_data[LDIF.LCARD_NAMES.CH0STD])**2 + (self.c2*lcard_data[LDIF.LCARD_NAMES.CH1STD])**2)
                 self.myData = pd.concat([self.myData, myDataPiece])
                 # data processing : save to file
                 if not(self._MeasurementsFile.closed):
@@ -226,7 +226,9 @@ class FilamentAnodeTab(object):
 
 
 
-if __name__ == "__main__":
+
+def test():
+    print("filament_and_anode test")
     import sys 
     import Lcard_EmptyDevice
     
@@ -243,4 +245,13 @@ if __name__ == "__main__":
     MainWindow.CloseEventListeners.append(ui.onCloseEvent)
     MainWindow.resize(1300,1000)
     MainWindow.show()
-    sys.exit(app.exec_())
+    app.exec_()
+
+if __name__ == "__main__":
+    try:
+        test()
+        print(">> success")
+    except Exception as e:
+        print(e)
+        a = input()
+    

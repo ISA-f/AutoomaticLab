@@ -218,7 +218,10 @@ class LcardVACPlot_Interface(object):
 
                 return self.centralwidget
 
-if __name__ == "__main__":
+
+
+def test():
+    print("Lcard VAC GUI test")
     import sys 
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
@@ -226,4 +229,13 @@ if __name__ == "__main__":
     LVACwidget = ui.setupUI()
     MainWindow.setCentralWidget(LVACwidget)
     MainWindow.show()
-    sys.exit(app.exec_())
+    app.exec_()
+    
+if __name__ == "__main__":
+    try:
+        test()
+        print(">> success")
+        print()
+    except Exception as e:
+        print(">>", e)
+        a = input()

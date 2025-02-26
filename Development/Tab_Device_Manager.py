@@ -61,9 +61,8 @@ class TabDeviceManager(object):
                 except Exception as e:
                         print("onClose Lcard :", e)
 
-
-
-if __name__ == "__main__":
+def test():
+    print("Tab_Device_Manager test")
     import sys 
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = MainWindow_withCloseEvent()
@@ -74,4 +73,14 @@ if __name__ == "__main__":
     MainWindow.setCentralWidget(centralwidget)
     MainWindow.CloseEventListeners.append(ui.onCloseEvent)
     MainWindow.show()
-    sys.exit(app.exec_())
+    app.exec_()
+
+
+if __name__ == "__main__":
+    try:
+        test()
+        print(">> success")
+        print()
+    except Exception as e:
+        print(">>", e)
+        a = input()

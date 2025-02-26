@@ -26,7 +26,7 @@ class Korad(Device):
         # unused but left for compatability
 
     def StartExperiment(self):
-        if self.ser == None:
+        if self.ser is None:
             return
         print("Device_Korad.StartExperiment()")
         self.mutex.acquire()
@@ -73,7 +73,8 @@ class Korad(Device):
 
     def ConnectToPhysicalDevice(self):
         config_dict = self.LoadConfiguration()
-        self.ser = serial.Serial(config_dict['com port'],
+        try:
+            self.ser = serial.Serial(config_dict['com port'],
                             config_dict['bits per second'],
                             timeout=1,
                             parity=config_dict['parity'],
@@ -81,6 +82,8 @@ class Korad(Device):
                             xonxoff=config_dict['xonxoff'],
                             rtscts=config_dict['rtscts'],
                             bytesize=config_dict['data bits'])
+        except Exception as e:
+            self.ser = None
 
     def DisconnectFromPhysicalDevice(self):
         self.FinishExperiment()
@@ -134,16 +137,31 @@ class Korad(Device):
             self.Set_v_i(v = s)
         return
 
-if __name__ == "__main__":
+    def __del__(self):
+        self.DisconnectFromPhysicalDevice()
+        return
+
+def test():
+    print("Test: Device Korad")
     myKorad = Korad('Korad.ini')
     myKorad.ConnectToPhysicalDevice()
     myKorad.StartExperiment()
-    print(myKorad.TakeMeasurements())
+    print(">>", myKorad.TakeMeasurements())
     myKorad.Set_v_i(1, None)
+    myKorad.FinishExperiment()
+    myKorad.DisconnectFromPhysicalDevice()
     #print(time.time())
     #for i in range(1000):
     #    v = myKorad.TakeMeasurements()
     #print(time.time())
+    return
+
+if __name__ == "__main__":
+    try:
+        test()
+        print(">> success")
+    except Exception as e:
+        print(">>",e)
         
 
 

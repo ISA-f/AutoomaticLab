@@ -3,14 +3,22 @@ import threading
 import time
 
 class LcardSyncdController:
-    def __init__(self, LcardDevice):
+    def __init__(self, LcardDevice, interrupt_on_Lcard_stop = True):
         self.myThread = None
         self.myEventListener = None
         self.IsActiveController = False
         self.ThreadSleepTime = None
         self.myLcardDevice = LcardDevice
+        self.InterruptOnLcardStop = interrupt_on_Lcard_stop
 
     def startController(self, EventListener, ThreadSleepTime):
+        if self.myLcardDevice is None:
+            return
+        if self.myLcardDevice.syncd is None:
+            return
+        if self.IsActiveController:
+            return
+
         self.ThreadSleepTime = ThreadSleepTime
         self.myEventListener = EventListener
         self.myThread = threading.Thread(target = self.checkWithTimeout)
@@ -20,7 +28,10 @@ class LcardSyncdController:
     def checkWithTimeout(self):
         while self.IsActiveController:
             time.sleep(self.ThreadSleepTime)
-            self.myEventListener(self.myLcardDevice.syncd())
+            if self.InterruptOnLcardStop and not(self.myLcardDevice.IsActiveMeasurements):
+                self.IsActiveController = False
+            else:
+                self.myEventListener(self.myLcardDevice.syncd())
 
     def finishController(self):
         self.IsActiveController = False
@@ -28,7 +39,9 @@ class LcardSyncdController:
             self.myThread.join()
         self.myThread = None
 
-if __name__ == "__main__":
+
+def test():
+    print("Lcard_syncdController test")
     def example(syncd):
         if syncd > 50000:
             print("syncd > 50000 !!!")
@@ -45,3 +58,11 @@ if __name__ == "__main__":
     
     lcard.finishMeasurements()
     lcard.disconnectFromPhysicalDevice()
+
+if __name__ == "__main__":
+    try:
+        test()
+        print(">>success")
+    except Exception as e:
+        print(">>", e)
+        a = input()
