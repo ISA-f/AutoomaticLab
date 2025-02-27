@@ -84,6 +84,8 @@ class Korad(Device):
                             bytesize=config_dict['data bits'])
         except Exception as e:
             self.ser = None
+            return False
+        return True 
 
     def DisconnectFromPhysicalDevice(self):
         self.FinishExperiment()

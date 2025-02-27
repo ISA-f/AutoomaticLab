@@ -46,7 +46,7 @@ class LcardE2010B_EmptyDevice(object):
         print("Try connect to Lcard")
         if self.IsConnected:
             print("Already connected to Lcard")
-            return
+            return True
         try:
             self.ldev = LCOMP(slot)
             self.ldev.OpenLDevice()
@@ -58,7 +58,8 @@ class LcardE2010B_EmptyDevice(object):
             self.plDescr = self.ldev.ReadPlataDescr()
         except Exception as e:
             print(e)
-        return
+            return False
+        return True
 
     def disconnectFromPhysicalDevice(self):
         self.finishMeasurements()

@@ -34,6 +34,8 @@ class Lcard_Interface_FullBuffers(object):
                 self.last_syncd = self.myLcardDataInterface.syncd
                 if self.myLcardController.myLcardDevice is None:
                         return
+                if self.myLcardController.myLcardDevice.buffer_size is None:
+                        return
                 self.buffer_size = self.myLcardController.myLcardDevice.buffer_size
                 self.half_buffer = self.buffer_size // 2
                 self.myLcardController.startController(EventListener = self.onControllerCall,
@@ -73,7 +75,6 @@ def test():
     lcard.connectToPhysicalDevice()
     lcard.loadConfiguration()
     lcard.startMeasurements()
-    
     LcardIFFB = Lcard_Interface_FullBuffers(lcard)
     LcardIFFB.startFullBuffersRead(ThreadSleepTime = 1)
     time.sleep(5)

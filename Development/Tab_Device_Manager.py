@@ -7,59 +7,29 @@ from Device_Korad import Korad
 from Lcard_EmptyDevice import LcardE2010B_EmptyDevice
 
 #------------------------ Tab imports ---------------------------------------
-from filament_and_anode_tab import FilamentAnodeTab
-from Lcard_VAC_GUI import LcardVACPlot_Interface
+from Tab_Filament_and_Anode import FilamentAnodeTab
+from Tab_Lcard_VAC_GUI import LcardVACPlot_Interface
+from Tab_Device_Connections import TabDeviceConnections
 
 
 class TabDeviceManager(object):
-
-        def __init__(self, lcard_config = "LcardE2010B.ini", korad_config = "Korad.ini"):
-                try:
-                        self.myLcard = LcardE2010B_EmptyDevice(lcard_config)
-                        self.myKorad = Korad(korad_config)
-                        self.FilamentAnode = FilamentAnodeTab(
-                                log_file = "ui_fa_test3.log",
-                                lcard_device = self.myLcard,
-                                korad_device = self.myKorad,
-                                ControlTableConfig = "CommandTable_example.ini")
-                        self.LcardVAC = LcardVACPlot_Interface(
-                                Lcard_device = self.myLcard)
-                except Exception as e:
-                        print(e)
-
-        def connect_lcard(self):
-                # self.myLcard = LcardE2010B_EmptyDevice(lcard_config) - уже было вызвано в __init__. НЕ НАДО ВЫЗЫВАТЬ!
-                try:
-                        self.myLcard.ConnectToPhysicalDevice(slot=0)
-                        self.myLcard.LoadConfiguration()
-                except Exception as e:
-                        print("try connect Lcard: ",e)
-
-        def connect_devices(self):
-                # Korad
-                self.myKorad.ConnectToPhysicalDevice()
-
-                # Lcard
-                self.connect_lcard()
-                return
+        def __init__(self):
+                self.DeviceConnections = TabDeviceConnections()
+                self.FilamentAnode = FilamentAnodeTab(
+                                lcard_device = self.DeviceConnections.myLcard_Device,
+                                korad_device = self.DeviceConnections.myKorad_Device)
+                self.LcardVAC = LcardVACPlot_Interface(
+                                Lcard_device = self.DeviceConnections.myLcard_Device)
 
         def setupUi(self):
                 self.tabs = QtWidgets.QTabWidget()
-                self.tabs.setObjectName("Tab_Device_Manager_Widget")
+                self.tabs.addTab(self.DeviceConnections.setupUi(), "Connections")
                 self.tabs.addTab(self.FilamentAnode.setupUi(), "Filament Anode")
                 self.tabs.addTab(self.LcardVAC.setupUI(), "Lcard VAC")
                 return self.tabs
                 
-
         def onCloseEvent(self):
-                try:
-                    self.myKorad.DisconnectFromPhysicalDevice()
-                except Exception as e:
-                        print("onClose Korad :", e)
-                try:
-                        self.myLcard.DisconnectFromPhysicalDevice()
-                except Exception as e:
-                        print("onClose Lcard :", e)
+                self.DeviceConnections.onCloseEvent()
 
 def test():
     print("Tab_Device_Manager test")

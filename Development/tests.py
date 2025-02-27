@@ -1,6 +1,7 @@
 # ------ GUI --------------
 import MainWindow_CloseEvent
-import Tab_Device_Manager, filament_and_anode_tab, Lcard_VAC_GUI
+import Tab_Device_Manager, Tab_Filament_and_Anode, Tab_Lcard_VAC_GUI
+import Tab_Device_Connections
 
 # ----- Devices -----------
 import Lcard_EmptyDevice, Device_Korad
@@ -14,8 +15,9 @@ import Lcard_syncdController
 tests = [Lcard_EmptyDevice.test, Device_Korad.test, # Devices
          LcardDataInterface.test,                   # Device Interfaces
          Lcard_syncdController.test, Lcard_IF_FullBuffers.test,
-         filament_and_anode_tab.test,               # GUI
-         Lcard_VAC_GUI.test,
+         Tab_Filament_and_Anode.test,               # GUI
+         #Tab_Device_Connections.test,
+         Tab_Lcard_VAC_GUI.test,
          Tab_Device_Manager.test
          ]
 

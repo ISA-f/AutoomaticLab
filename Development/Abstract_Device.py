@@ -5,10 +5,7 @@ class Device:
         super().__init__()
         self._ConfigFilename = config_filename
         self._MeasurementsFile = None
-
-    @property
-    def ConfigFilename(self) -> str:
-        return self._ConfigFilename
+        self.ConfigFilename = config_filename
 
     @property
     def CurrentMeasurementsFile(self):

@@ -27,28 +27,32 @@ from CommandTable import CommandTable
 
 class FilamentAnodeTab(object):
         
-        def __init__(self, log_file, lcard_device, korad_device, ControlTableConfig = "CommandTable_example.ini"):
-                self.ControlTableConfig = ControlTableConfig
+        def __init__(self, lcard_device, korad_device):
+                self.IsActiveMeasurements = False
+                self.timer = None
+                self.CommandTable = None
+                self._MeasurementsFile = None
+                # devices:
                 self.myLcardIF = LDIF.LcardDataInterface(lcard_device)
                 self.myKorad = korad_device
-                self.myConstants = "Constants.ini"
-                self.LogFile = log_file
+                # data processing:
                 self.myData = pd.DataFrame(columns = {**LDIF.LCARD_NAMES._member_map_,
                                                       **DKorad.KORAD_NAMES._member_map_}.values())
                 self.myData[["Ua", "Ia", "Imin", "sigmaI"]] = None
                 self.myDataColumnDict = {**LDIF.LCARD_NAMES._value2member_map_,
                                          **DKorad.KORAD_NAMES._value2member_map_,
                                          "Ua" : "Ua", "Ia" : "Ia", "Imin" : "Imin", "sigmaI" : "sigmaI"}
+                # user input filenames:
+                self.ControlTableConfig = "CommandTable_example.ini"
+                self.LogFilename = "ui_fa_test.log"
+                # hardcoded file for synthtetic channels:
+                self.myConstants = "Constants.ini"
                 config = configparser.ConfigParser()
                 config.read(self.myConstants)
                 self.k1 = float(config['Constants']['k1'])
                 self.k2 = float(config['Constants']['k2'])
                 self.c1 = float(config['Constants']['c1'])
                 self.c2 = float(config['Constants']['c2'])
-
-                self.timer = None
-                self.CommandTable = None
-                self._MeasurementsFile = None
 
         def setupUi(self):
                 self.centralwidget = QtWidgets.QWidget()
@@ -62,17 +66,33 @@ class FilamentAnodeTab(object):
                 self.LCD_Anode_widget.setGeometry(QtCore.QRect(300, 0, 900, 900))
                 self.myLCD_Anode = LCD_Anode.LCD_Anode(self.LCD_Anode_widget)
                 self.myLCD_Anode.SetupUI(self.LCD_Anode_widget)
-                # Start-Stop Buttons
+                # CommandTable : Start-Stop Buttons
                 self.pushButton_start = QtWidgets.QPushButton(self.centralwidget)
                 self.pushButton_start.setStyleSheet("font: 75 18pt \"Tahoma\";")
                 self.pushButton_start.setObjectName("pushButton_start")
-                self.pushButton_start.setGeometry(QtCore.QRect(0, 350, 500, 50))
+                self.pushButton_start.setGeometry(QtCore.QRect(400, 850, 500, 50))
                 self.pushButton_stop = QtWidgets.QPushButton(self.centralwidget)
                 self.pushButton_stop.setStyleSheet("font: 75 18pt \"Tahoma\";")
                 self.pushButton_stop.setObjectName("pushButton_stop")
-                self.pushButton_stop.setGeometry(QtCore.QRect(0, 400, 500, 50))
+                self.pushButton_stop.setGeometry(QtCore.QRect(400, 900, 500, 50))
                 self.pushButton_start.setText("Start Command Table")
                 self.pushButton_stop.setText("Stop Command Table")
+                # CommandTable : Filename
+                self.QLabel_CommandTableFilename = QtWidgets.QLabel("Command Table Filename:", self.centralwidget)
+                self.QLabel_CommandTableFilename.setGeometry(QtCore.QRect(270, 750, 500, 40))
+                self.QLabel_CommandTableFilename.setStyleSheet("font: 75 15pt \"Tahoma\";")
+                self.QLineEdit_CommandTableFilename = QtWidgets.QLineEdit(parent = self.centralwidget)
+                self.QLineEdit_CommandTableFilename.setGeometry(QtCore.QRect(650, 750, 500, 50))
+                self.QLineEdit_CommandTableFilename.setStyleSheet("font: 75 12pt \"Tahoma\";")
+                self.QLineEdit_CommandTableFilename.setText("CommandTable_example.ini")
+                # Log : Filename
+                self.QLabel_LogFilename = QtWidgets.QLabel("Log Filename:", self.centralwidget)
+                self.QLabel_LogFilename.setGeometry(QtCore.QRect(270, 800, 500, 40))
+                self.QLabel_LogFilename.setStyleSheet("font: 75 15pt \"Tahoma\";")
+                self.QLineEdit_LogFilename = QtWidgets.QLineEdit(parent = self.centralwidget)
+                self.QLineEdit_LogFilename.setGeometry(QtCore.QRect(650, 800, 500, 50))
+                self.QLineEdit_LogFilename.setStyleSheet("font: 75 12pt \"Tahoma\";")
+                self.QLineEdit_LogFilename.setText("ui_fa_test.log")
                 #self.QLayoutCommandTable = QtWidgets.QVBoxLayout(self.centralwidget)
                 #self.QLayoutCommandTable.addWidget(self.pushButton_start)
                 #self.QLayoutCommandTable.addWidget(self.pushButton_stop)
@@ -100,12 +120,14 @@ class FilamentAnodeTab(object):
                 #self.QLayout_PlotComboBoxes.addWidget(self.PlotXAxis_ComboBox, 0,1)
                 #self.QLayout_PlotComboBoxes.addWidget(self.PlotYAxis_Label, 1,0)
                 #self.QLayout_PlotComboBoxes.addWidget(self.PlotYAxis_ComboBox, 1,1)
+
                 #Korad
                 self.myKoradwidget = QtWidgets.QWidget(self.centralwidget)
                 self.myKoradwidget.setObjectName("Korad widget")
-                self.myKoradwidget.setGeometry(QtCore.QRect(0, 500, 300, 300))
+                self.myKoradwidget.setGeometry(QtCore.QRect(0, 400, 300, 300))
                 self.myKoradInterface = Korad_Interface(self.myKoradwidget)
                 self.myKoradInterface.SetupUI()
+                
                 #Layouts
                 #self.QLayoutLCDs = QtWidgets.QHBoxLayout(self.centralwidget)
                 #self.QLayoutLCDs.addWidget(self.LCD_Filament_widget)
@@ -116,6 +138,7 @@ class FilamentAnodeTab(object):
                 #self.QLayout_FA.addWidget(self.myPlotWidget, 1,0)
                 #self.QLayout_FA.addLayout(self.QLayout_PlotComboBoxes, 1,1)
                 #self.centralwidget.setLayout(self.QLayout_FA)
+
                 #Connections
                 self.PlotXAxis_ComboBox.currentTextChanged.connect(self.updatePlot)
                 self.PlotYAxis_ComboBox.currentTextChanged.connect(self.updatePlot)
@@ -125,17 +148,24 @@ class FilamentAnodeTab(object):
                 return self.centralwidget
 
         def start_filament_anode(self, measurements_file):
+                if self.IsActiveMeasurements:
+                        return
+                self.setIsActiveMeasurements(True)
                 self.timer = QTimer()
                 d = {"SET_I": self.myKorad.set_uncheckedI,
                      "SET_U": self.myKorad.set_uncheckedU}
+                self.ControlTableConfig = self.QLineEdit_CommandTableFilename.text()
+                self.LogFilename = self.QLineEdit_LogFilename.text()
                 try:
                         self.CommandTable = CommandTable(config_file = self.ControlTableConfig,
                                                  dCommand_to_Functor = d,
                                                  onFinish = self.onTableFinish)
+                        self._MeasurementsFile = open(self.LogFilename, "ab")
                 except Exception as e:
                         print(e)
-                        a = input()
-                self._MeasurementsFile = open(self.LogFile, "ab")
+                        self.setIsActiveMeasurements(False)
+                        return
+                
                 self.myLcardIF.myLcardDevice.addListener()
                 self.myKorad.StartExperiment()
                 self.CommandTable.startTableExecution()
@@ -180,7 +210,6 @@ class FilamentAnodeTab(object):
                                             myDataPiece["Imin"],
                                             myDataPiece["sigmaI"])
 
-
         def updatePlot(self):
                 amount = 200
                 x_label = self.myDataColumnDict[self.PlotXAxis_ComboBox.currentText()]
@@ -194,6 +223,7 @@ class FilamentAnodeTab(object):
         def onCloseEvent(self):
                 print("Disconnecting from all devices")
                 try:
+                        self.setIsActiveMeasurements(False)
                         if self.CommandTable:
                                 self.CommandTable.interruptTableExecution()
                         if self.timer:
@@ -211,6 +241,7 @@ class FilamentAnodeTab(object):
 
         def stop_filament_anode(self):
             try:
+                    self.setIsActiveMeasurements(False)
                     if self.timer:
                             self.timer.stop()
                     if self.CommandTable:
@@ -223,6 +254,14 @@ class FilamentAnodeTab(object):
                             self.myLcardIF.myLcardDevice.removeListener()
             except Exception as e:
                     print(e)
+
+        def setIsActiveMeasurements(self, IsActiveMeasurements: bool):
+                self.IsActiveMeasurements = IsActiveMeasurements
+                self.pushButton_start.setEnabled(not(IsActiveMeasurements))
+                self.pushButton_stop.setEnabled(IsActiveMeasurements)
+                self.QLineEdit_CommandTableFilename.setEnabled(not(IsActiveMeasurements))
+                self.QLineEdit_LogFilename.setEnabled(not(IsActiveMeasurements))
+                return
 
 
 
@@ -237,8 +276,7 @@ def test():
 
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = MainWindow_withCloseEvent()
-    ui = FilamentAnodeTab(log_file = "ui_fa_test3.log", 
-                          lcard_device = myLcard, 
+    ui = FilamentAnodeTab(lcard_device = myLcard, 
                           korad_device = myKorad)
     centralwidget = ui.setupUi()
     MainWindow.setCentralWidget(centralwidget)
