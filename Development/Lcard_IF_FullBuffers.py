@@ -21,8 +21,11 @@ then data is cropped to the needed part of half buffer and
 stored into Lcard_Interface_FullBuffers.myData.
 """
 
+# TO DO : update to LDIF.LCARD_NAMES.CH0RAW and DataFrames
+
 class Lcard_Interface_FullBuffers(object):
-        def __init__(self, LcardDevice):
+        def __init__(self, LcardDevice, onDataUpdate):
+                self.onDataUpdate = onDataUpdate
                 self.myLcardDataInterface = LDIF.LcardDataInterface(LcardDevice)
                 self.myData = None
                 self.myLcardController = LcardSyncdController(LcardDevice)
@@ -58,6 +61,7 @@ class Lcard_Interface_FullBuffers(object):
                                                       self.myLcardDataInterface.data],
                                                      axis = 1)
                 self.last_syncd = self.myLcardDataInterface.syncd
+                self.onDataUpdate(self.Data)
                 return
 
         def finishFullBuffersRead(self):
@@ -66,16 +70,26 @@ class Lcard_Interface_FullBuffers(object):
 
         def clearData(self):
             self.myData = np.array()
+            self.onDataUpdate(self.myData)
+
+        def getIsActiveInterface(self):
+            if self.myLcardController is None:
+                return False
+            return self.myLcardController.IsActiveController
 
 
 def test():
     print("Lcard_IF_FullBuffers test")
+
+    def example():
+        print("example() called")
+    
     import Lcard_EmptyDevice
     lcard = Lcard_EmptyDevice.LcardE2010B_EmptyDevice("LcardE2010B.ini")
     lcard.connectToPhysicalDevice()
     lcard.loadConfiguration()
     lcard.startMeasurements()
-    LcardIFFB = Lcard_Interface_FullBuffers(lcard)
+    LcardIFFB = Lcard_Interface_FullBuffers(lcard, example)
     LcardIFFB.startFullBuffersRead(ThreadSleepTime = 1)
     time.sleep(5)
     LcardIFFB.finishFullBuffersRead()

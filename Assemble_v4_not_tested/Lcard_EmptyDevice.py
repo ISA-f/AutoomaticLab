@@ -39,14 +39,14 @@ class LcardE2010B_EmptyDevice(object):
         self.IsConnected = False
         self.BufferMutex = Lock()
         self.SyncdMutex = Lock()
-        self.IsThreadingOff = False
+        self.ListenersAmount = 0
         return
 
     def connectToPhysicalDevice(self, slot: int = 0):    
         print("Try connect to Lcard")
         if self.IsConnected:
             print("Already connected to Lcard")
-            return
+            return True
         try:
             self.ldev = LCOMP(slot)
             self.ldev.OpenLDevice()
@@ -58,9 +58,11 @@ class LcardE2010B_EmptyDevice(object):
             self.plDescr = self.ldev.ReadPlataDescr()
         except Exception as e:
             print(e)
-        return
+            return False
+        return True
 
     def disconnectFromPhysicalDevice(self):
+        self.finishMeasurements()
         if self.ldev and self.IsConnected:
             self.ldev.CloseLDevice()
             print("Lcard disconnected")
@@ -109,7 +111,12 @@ class LcardE2010B_EmptyDevice(object):
         return
 
     def startMeasurements(self):
-        if not(self.IsConnected) or self.IsActiveMeasurements:
+        if not(self.IsConnected):
+            self.connectToPhysicalDevice()
+            self.loadConfiguration()
+        if not(self.IsConnected):
+            return
+        if self.IsActiveMeasurements:
             return
         self.IsActiveMeasurements = True
         self.buffer_size = self.ldev.RequestBufferStream(size=131072, stream_id=L_STREAM_ADC)
@@ -123,13 +130,15 @@ class LcardE2010B_EmptyDevice(object):
         if not(self.IsConnected):
             return
         if self.ldev:
+            print("ldev.StopLDevice() call")
             self.ldev.StopLDevice()
         self.IsActiveMeasurements = False
         return
 
     def readBuffer(self):
-        if not(self.IsConnected) or not(self.IsActiveMeasurements) or self.IsThreadingOff:
-            return
+        if not(self.IsConnected) or not(self.IsActiveMeasurements):
+            print(f"Lcard.IsConnected = {self.IsConnected}. Lcard.IsActiveMeasurements = {self.IsActiveMeasurements}.Tried Lcard:readBuffer()")
+            return None, None
         self.BufferMutex.acquire()
         self.SyncdMutex.acquire()
         syncd = self.syncd()
@@ -139,29 +148,51 @@ class LcardE2010B_EmptyDevice(object):
         self.BufferMutex.release()
         return data, syncd
 
-
     def syncd(self):
-        if not(self.IsConnected) or not(self.IsActiveMeasurements) or self.IsThreadingOff:
+        if not(self.IsConnected) or not(self.IsActiveMeasurements):
             return
         self.SyncdMutex.acquire()
         syncd = self.syncd()
         self.SyncdMutex.release()
         return syncd
 
+    def addListener(self):
+        self.ListenersAmount += 1
+        if not(self.IsActiveMeasurements):
+            self.startMeasurements()
 
+    def removeListener(self):
+        self.ListenersAmount -= 1
+        if (self.ListenersAmount <= 0) and self.IsActiveMeasurements:
+            self.finishMeasurements()
+            self.ListenersAmount = 0
+
+    def __del__(self):
+        self.disconnectFromPhysicalDevice()
+        return
+
+
+def test():
+    print("LcardE2010B EmptyDevice test")
+    myLcard = LcardE2010B_EmptyDevice("LcardE2010B.ini")
+    myLcard.connectToPhysicalDevice(slot=0)
+    myLcard.loadConfiguration()
+        
+    myLcard.startMeasurements()
+    data, syncd = myLcard.readBuffer()
+    time.sleep(3)
+    data, syncd = myLcard.readBuffer()
+    myLcard.finishMeasurements()
+    myLcard.disconnectFromPhysicalDevice()
+    if data is None:
+        return
+    print(">> data.shape, syncd:",data.shape, syncd)
+    return
 
 if __name__ == "__main__":
-        myLcard = LcardE2010B_EmptyDevice("LcardE2010B.ini")
-        myLcard.connectToPhysicalDevice(slot=0)
-        myLcard.loadConfiguration()
-        
-        myLcard.startMeasurements()
-        data, syncd = myLcard.readBuffer()
-        print(data.shape, syncd)
-        time.sleep(3)
-        data, syncd = myLcard.readBuffer()
-        print(data.shape, syncd)
-        myLcard.finishMeasurements()
-        myLcard.disconnectFromPhysicalDevice()
+    try:
+        test()
+    except Exception as e:
+        print(">>",e)
 
 

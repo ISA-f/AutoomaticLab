@@ -40,6 +40,8 @@ class LcardSyncdController:
         self.myThread = None
 
 
+
+
 def test():
     print("Lcard_syncdController test")
     def example(syncd):
