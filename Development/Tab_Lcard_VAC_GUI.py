@@ -31,29 +31,38 @@ class LcardVACPlot_Interface(object):
             print("Lcard VAC __init__ executed")
 
         def onDataUpdate(self, Data):
+            print("LVAC.onDataUpdate")
             self.LastData = Data
             self._updatePlot()
+
+        def _getStartEndIndex(self):
+            start, end = 0, self.LastData.shape[0]
+            try:
+                start = int(self.QLineEdit_ShownData_StartIndex.text())
+                end = int(self.QLineEdit_ShownData_EndIndex.text())
+            except Exception as e:
+                pass
+            return start, end
 
         def _updatePlot(self):
             if self.Y_x_plot is None:
                 return
             if self.LastData is None:
                 return
-            start, end = 0, -1
+            x_label = self.PlotXAxis_ComboBox.currentText()
+            y_label = self.PlotYAxis_ComboBox.currentText()
+            self.Y_x_plot.setAxisLabel(x_label, y_label)
+            
+            start, end = self._getStartEndIndex()
+            self.QLineEdit_ShownData_StartIndex.setText(str(start))
+            self.QLineEdit_ShownData_EndIndex.setText(str(end))
+            
             try:
-                x_label = self.PlotXAxis_ComboBox.currentText()
-                y_label = self.PlotYAxis_ComboBox.currentText()
-                self.Y_x_plot.setAxisLabel(x_label, y_label)
-                
-                start = int(self.QLineEdit_ShownData_StartIndex.text())
-                end = int(self.QLineEdit_ShownData_EndIndex.text())
                 x_data = str_to_channel_data(self.LastData, x_label)[start:end]
                 y_data = str_to_channel_data(self.LastData, y_label)[start:end]
                 self.Y_x_plot.update_plot(x_data, y_data)
             except Exception as e:
                 print("LVAC._updatePlot", e)
-            self.QLineEdit_ShownData_StartIndex.setText(str(start))
-            self.QLineEdit_ShownData_EndIndex.setText(str(end))
             return
 
         def _updateIsActiveInterface(self):
@@ -75,14 +84,21 @@ class LcardVACPlot_Interface(object):
         def pushSaveButton(self):
             print("LVAC.pushSaveButton call")
             s = self.QLineEdit_Save.text()
+            start,end = self._getStartEndIndex()
             try:
-                start = int(self.QLineEdit_ShownData_StartIndex.text())
-                end = int(self.QLineEdit_ShownData_EndIndex.text())
-                (self.LastData[start : end]).to_excel(s)
-                #content =
-                #file = open(s, "ab")
-                #file.write(content)
-                #file.close()
+                df = pd.DataFrame(self.LastData[start : end, :],
+                                  columns = ["channel 0", "channel 1", "channel 2", "channel 3"])
+                try:
+                    writer = pd.ExcelWriter(s, mode = "a", if_sheet_exists = 'new')
+                except Exception as e:
+                    writer = pd.ExcelWriter(s, mode = "w")
+                
+                d = self.myLcard_IFFB.getParameters()
+                Lcard_description = pd.Series(list(d.values()),index=d.keys())
+                Lcard_description.to_frame().to_excel(writer, sheet_name = "Lcard_parameters")
+                Lcard_description.to_excel(writer)
+                df.to_excel(writer)
+                writer.close()
             except Exception as e:
                 print("LVAC.pushSaveButton", e)
             print("LVAC.pushSaveButton executed")
@@ -116,10 +132,10 @@ class LcardVACPlot_Interface(object):
             self.PlotYAxis_ComboBox.addItems(dstr_to_channel.keys())
 
             self.QLayout_PlotComboBoxes = QtWidgets.QGridLayout()
-            self.QLayout_PlotComboBoxes.addWidget(self.PlotXAxis_Label, 0,0)
-            self.QLayout_PlotComboBoxes.addWidget(self.PlotXAxis_ComboBox, 0,1)
-            self.QLayout_PlotComboBoxes.addWidget(self.PlotYAxis_Label, 1,0)
-            self.QLayout_PlotComboBoxes.addWidget(self.PlotYAxis_ComboBox, 1,1)
+            self.QLayout_PlotComboBoxes.addWidget(self.PlotXAxis_Label, 1,0)
+            self.QLayout_PlotComboBoxes.addWidget(self.PlotXAxis_ComboBox, 1,1)
+            self.QLayout_PlotComboBoxes.addWidget(self.PlotYAxis_Label, 0,0)
+            self.QLayout_PlotComboBoxes.addWidget(self.PlotYAxis_ComboBox, 0,1)
 
         # --- Plot Start End indexes ---
             self.QLineEdit_ShownData_StartIndex = QtWidgets.QLineEdit(parent = self.centralwidget)
@@ -197,6 +213,7 @@ class LcardVACPlot_Interface(object):
             self.QpushButton_Start.clicked.connect(self.pushStartButton)
             self.QpushButton_Stop.clicked.connect(self.pushStopButton)
             self.QpushButton_Save.clicked.connect(self.pushSaveButton)
+            self.QpushButton_Clear.clicked.connect(self.pushClearButton)
                 
             self.QLineEdit_ShownData_StartIndex.editingFinished.connect(self._updatePlot)
             self.QLineEdit_ShownData_EndIndex.editingFinished.connect(self._updatePlot)
@@ -214,7 +231,10 @@ def test():
     
     Lcard_Device = Lcard_EmptyDevice.LcardE2010B_EmptyDevice("LcardE2010B.ini")
     ui = LcardVACPlot_Interface(Lcard_Device)
-    
+    ui.LastData = np.random.random((10,4))
+    ui.LastData[:, 1] += ui.LastData[:, 0]
+    ui.LastData[:, 2] *= ui.LastData[:, 1]
+    ui.LastData[:, 3] = ui.LastData[:, 2]*3 + ui.LastData[:, 0]
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     LVACwidget = ui.setupUI()

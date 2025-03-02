@@ -18,10 +18,8 @@ class Korad(Device):
 
     def __init__(self, config_filename:str):
         super().__init__(config_filename)
-        self.DeviceParameters = []
         self.ser = None
         self.mutex = Lock()
-
         self.myData = pd.DataFrame(columns = ['time', 'U', 'I']) # unused
         # unused but left for compatability
 
@@ -44,7 +42,7 @@ class Korad(Device):
         return
     
     def TakeMeasurements(self):
-        if self.ser == None:
+        if self.ser is None:
             time_sistem = time.time()
             print("Korad is not connected; tried Korad.TakeMeasurements()")
             return pd.Series([time_sistem, None, None],index = KORAD_NAMES._member_map_.values())
@@ -143,9 +141,25 @@ class Korad(Device):
         self.DisconnectFromPhysicalDevice()
         return
 
+    def getParameters(self):
+        d = {"Korad.serial_port" : None}
+        if not(self.ser):
+            return d
+        d["Korad.serial_port"] = self.ser.port
+        d["Korad.baudrate"] = self.ser.baudrate
+        d["Korad.bytesize"] = self.ser.bytesize
+        d["Korad.parity"] = self.ser.parity
+        d["Korad.stopbits"] = self.ser.stopbits
+        d["Korad.timeout"] = self.ser.timeout
+        d["Korad.xonxoff"] = self.ser.xonxoff
+        d["Korad.rtscts"] = self.ser.rtscts
+        d["Korad.dsrdtr"] = self.ser.dsrdtr
+        return d
+
 def test():
     print("Test: Device Korad")
     myKorad = Korad('Korad.ini')
+    print(myKorad.getParameters())
     myKorad.ConnectToPhysicalDevice()
     myKorad.StartExperiment()
     print(">>", myKorad.TakeMeasurements())

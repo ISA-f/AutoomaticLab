@@ -55,18 +55,20 @@ AveragedDataColumns = np.array(
     )
 
 def calculateAverage(lcard_IF):
+    data = pd.Series([None]*16, index = np.ravel(AveragedDataColumns))
+    data[LCARD_NAMES.COMP_TIME] = lcard_IF.read_time
     if lcard_IF.data is None:
-        time_sistem = time.time()
-        lcard_IF.data = pd.Series([time_sistem, None], index = [LCARD_NAMES.COMP_TIME, LCARD_NAMES.CH0MEAN])
+        lcard_IF.data = data
         return
     N_channels = lcard_IF.data.shape[0]
     columns = np.ravel(AveragedDataColumns[:, :N_channels])
-    DataPiece = np.ravel(
-            [np.mean(lcard_IF.data, axis = 1),
-             np.std(lcard_IF.data, axis = 1),
-             np.min(lcard_IF.data, axis = 1),
-             np.max(lcard_IF.data, axis = 1)])
-    lcard_IF.data = pd.Series(DataPiece,index = columns)
+    values = np.ravel(
+        [np.mean(lcard_IF.data, axis = 1),
+         np.std(lcard_IF.data, axis = 1),
+         np.min(lcard_IF.data, axis = 1),
+         np.max(lcard_IF.data, axis = 1)])
+    data[columns] = values
+    lcard_IF.data = data
     return
 
 """
@@ -141,6 +143,7 @@ def test():
     lcard.disconnectFromPhysicalDevice()
 
     calculateAverage(lcard_IF)
+    print(lcard_IF.data)
     cropToRequestedBuffer(lcard_IF2, 8000)
 
 

@@ -1,5 +1,6 @@
 import configparser
 import time
+import numpy as np
 
 from lcomp.lcomp import LCOMP
 from lcomp.ldevioctl import (E2010, E2010B, L_ADC_PARAM,
@@ -170,6 +171,29 @@ class LcardE2010B_EmptyDevice(object):
     def __del__(self):
         self.disconnectFromPhysicalDevice()
         return
+
+    def getParameters(self):
+        d = {"Connected" : self.IsConnected}
+        if not(self.IsConnected):
+            return d
+        d["IsActiveMeasurements"] = self.IsActiveMeasurements
+        if not(self.adcPar):
+            return d
+        d["s_Type"] = self.adcPar.t4.s_Type
+        d["FIFO"] = self.adcPar.t4.FIFO
+        d["IrqStep"] = self.adcPar.t4.IrqStep
+        d["Pages"] = self.adcPar.t4.Pages
+        d["AutoInit"] = self.adcPar.t4.AutoInit
+        d["dRate"] = self.adcPar.t4.dRate
+        d["dKadr"] = self.adcPar.t4.dKadr
+        d["SynchroType"] = self.adcPar.t4.SynchroType
+        d["SynchroSrc"] = self.adcPar.t4.SynchroSrc
+        d["AdcIMask"] = self.adcPar.t4.AdcIMask
+        d["NCh"] = self.adcPar.t4.NCh
+        #d["Chn"] = np.array(self.adcPar.t4.Chn)
+        d["IrqEna"] = self.adcPar.t4.IrqEna
+        d["AdcEna"] = self.adcPar.t4.AdcEna
+        return d
 
 
 def test():

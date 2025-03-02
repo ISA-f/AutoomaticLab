@@ -39,7 +39,11 @@ class LcardSyncdController:
             self.myThread.join()
         self.myThread = None
 
-
+    def getParameters(self):
+        d = self.myLcardDevice.getParameters()
+        d["SyncdController.IsActiveController"] = self.IsActiveController
+        d["SyncdController.ThreadSleepTime"] = self.ThreadSleepTime
+        return d
 
 
 def test():

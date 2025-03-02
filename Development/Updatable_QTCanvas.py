@@ -15,25 +15,33 @@ class PyplotWidget(FigureCanvas):
         self.axes = fig.add_subplot(111)
         super(PyplotWidget, self).__init__(fig)
 
-    def update_plot(self, xdata, ydata):
+    def update_plot(self, xdata, ydata, s = 15):
         self.axes.cla()  # Clear the canvas.
-        self.axes.plot(xdata, ydata, 'r')
-        # Trigger the canvas to update and redraw.
+        self.axes.plot(xdata, ydata, color = 'r')
+        self.axes.scatter(xdata, ydata, color = 'black', s = s)
         self.draw()
-        #print("updated plot, shape", xdata.shape, ydata.shape)
 
     def setAxisLabel(self, x_label, y_label):
         self.axes.set_xlabel(x_label)
         self.axes.set_ylabel(y_label)
         self.draw()
 
-
-
-if __name__ == "__main__":
+def test():
+    print("Updatable_QTCanvas.PyplotWidget test")
+    import numpy as np
+    data = np.random.random((2,10))
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     p = PyplotWidget()
     p.setAxisLabel("x_hello", "y_hello")
+    p.update_plot(data[0], data[1])
     MainWindow.setCentralWidget(p)
     MainWindow.show()
     app.exec_()
+
+if __name__ == "__main__":
+    try:
+        test()
+        print(">> success")
+    except Exception as e:
+        print(">>",e)

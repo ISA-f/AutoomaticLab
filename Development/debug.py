@@ -1,18 +1,20 @@
 import LcardDataInterface as LDIF
+import Device_Korad as DKorad
 import Lcard_EmptyDevice
 import numpy as np
 import pandas as pd
+import serial
 
-data = np.random.random((4,10))
-DLcard = Lcard_EmptyDevice.LcardE2010B_EmptyDevice("LcardE2010B.ini")
-LcardIF = LDIF.LcardDataInterface(DLcard)
+ldif = LDIF.LcardDataInterface("debug")
+ldif.data = np.random.random((4, 8000))
+ldif.syncd = 1000
+LDIF.cropToRequestedBuffer(ldif, 100)
+LDIF.calculateAverage(ldif)
+print(ldif.data)
 
-N_channels, N_measurements = data.shape[0], data.shape[1]
-LcardIF.data = pd.DataFrame(data.T, columns = LDIF.RawChannelNames[:N_channels])
-LcardIF.data[LDIF.LCARD_NAMES.INDEX] = np.arange(N_measurements)
-print(LcardIF.data.drop(LDIF.LCARD_NAMES.INDEX, axis = 1))
-
-LDIF.calculateAverage(LcardIF)
+ldif = LDIF.LcardDataInterface(None)
+LDIF.calculateAverage(ldif)
+print(ldif.data)
 """
 def test():
     print("Lcard VAC GUI test")

@@ -3,6 +3,7 @@ import time
 import pandas as pd
 import numpy as np
 import configparser
+from datetime import datetime
 
 #------------------------ Qt and GUI imports --------------------------------
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -23,7 +24,13 @@ import LcardDataInterface as LDIF
 #------------------------ Other imports ----------------------------------
 from CommandTable import CommandTable
 
-
+def columns_to_csv_string(columns):
+    s = ""
+    for column in columns:
+        s += str(column) + ";"
+    return (s + ";CommandTable\n")
+        
+        
 
 class FilamentAnodeTab(object):
         
@@ -44,7 +51,7 @@ class FilamentAnodeTab(object):
                                          "Ua" : "Ua", "Ia" : "Ia", "Imin" : "Imin", "sigmaI" : "sigmaI"}
                 # user input filenames:
                 self.ControlTableConfig = "CommandTable_example.ini"
-                self.LogFilename = "ui_fa_test.log"
+                self.LogFilename = ("Logger_FA_" + str(datetime.now()) + ".csv").replace(":","_")
                 # hardcoded file for synthtetic channels:
                 self.myConstants = "Constants.ini"
                 config = configparser.ConfigParser()
@@ -92,7 +99,8 @@ class FilamentAnodeTab(object):
                 self.QLineEdit_LogFilename = QtWidgets.QLineEdit(parent = self.centralwidget)
                 self.QLineEdit_LogFilename.setGeometry(QtCore.QRect(650, 800, 500, 50))
                 self.QLineEdit_LogFilename.setStyleSheet("font: 75 12pt \"Tahoma\";")
-                self.QLineEdit_LogFilename.setText("ui_fa_test.log")
+                self.QLineEdit_LogFilename.setText(self.LogFilename)
+                
                 #self.QLayoutCommandTable = QtWidgets.QVBoxLayout(self.centralwidget)
                 #self.QLayoutCommandTable.addWidget(self.pushButton_start)
                 #self.QLayoutCommandTable.addWidget(self.pushButton_stop)
@@ -146,14 +154,23 @@ class FilamentAnodeTab(object):
                 self.pushButton_stop.clicked.connect(self.stop_filament_anode)
                 
                 return self.centralwidget
+        
+        def onKoradSetI(self, value):
+                self._MeasurementsFile.write(b"Korad.Set_unchecked_I ")
+                self._MeasurementsFile.write(str.encode(value))
+                self.myKorad.set_uncheckedI(value)
+
+        def onKoradSetU(self, value):
+                self._MeasurementsFile.write(str.encode((";"*len(self.myData.columns) + "Korad.Set_unchecked_U;" + value + ";\n")))
+                self.myKorad.set_uncheckedU(value)
 
         def start_filament_anode(self, measurements_file):
                 if self.IsActiveMeasurements:
                         return
                 self.setIsActiveMeasurements(True)
                 self.timer = QTimer()
-                d = {"SET_I": self.myKorad.set_uncheckedI,
-                     "SET_U": self.myKorad.set_uncheckedU}
+                d = {"SET_I": self.onKoradSetI,
+                     "SET_U": self.onKoradSetU}
                 self.ControlTableConfig = self.QLineEdit_CommandTableFilename.text()
                 self.LogFilename = self.QLineEdit_LogFilename.text()
                 try:
@@ -161,11 +178,11 @@ class FilamentAnodeTab(object):
                                                  dCommand_to_Functor = d,
                                                  onFinish = self.onTableFinish)
                         self._MeasurementsFile = open(self.LogFilename, "ab")
+                        self._MeasurementsFile.write(str.encode(columns_to_csv_string(self.myData.columns)))
                 except Exception as e:
                         print(e)
                         self.setIsActiveMeasurements(False)
                         return
-                
                 self.myLcardIF.myLcardDevice.addListener()
                 self.myKorad.StartExperiment()
                 self.CommandTable.startTableExecution()
@@ -173,7 +190,6 @@ class FilamentAnodeTab(object):
                 self.timer.start(20)
 
         def update_filament_anode(self):
-                #print("update filament anode")
                 # receive data from Korad 
                 korad_data = self.myKorad.TakeMeasurements()
                 # receive data from Lcard
@@ -187,20 +203,18 @@ class FilamentAnodeTab(object):
                 # data processing : update synth channel
                 # Тут формулки, их желательно проверить на корректность
                 myDataPiece[["Ua", "Ia", "Imin", "sigmaI"]] = None
-                if LDIF.LCARD_NAMES.CH0MEAN in lcard_data.index:
-                        myDataPiece["Ua"] = self.k1*lcard_data[LDIF.LCARD_NAMES.CH0MEAN]              # Ua = k1 <ch1>
-                if {LDIF.LCARD_NAMES.CH0MEAN, LDIF.LCARD_NAMES.CH1MEAN}.issubset(lcard_data.index):   # Ia = c1 <ch1> - c2 <ch2>
+                if not(lcard_data[LDIF.LCARD_NAMES.CH0MEAN] is None):
+                        myDataPiece["Ua"] = self.k1*lcard_data[LDIF.LCARD_NAMES.CH0MEAN]                     # Ua = k1 <ch1>     
+                if not(None in [lcard_data[LDIF.LCARD_NAMES.CH0MEAN], lcard_data[LDIF.LCARD_NAMES.CH1MEAN]]):   # Ia = c1 <ch1> - c2 <ch2>
                         myDataPiece["Ia"] = self.c1*lcard_data[LDIF.LCARD_NAMES.CH0MEAN] - self.c2*lcard_data[LDIF.LCARD_NAMES.CH1MEAN]
-                if {LDIF.LCARD_NAMES.CH0MIN, LDIF.LCARD_NAMES.CH1MAX}.issubset(lcard_data.index):     # Imin = c1 ch1_min - c2 ch2_max
+                if not(None in [lcard_data[LDIF.LCARD_NAMES.CH0MIN], lcard_data[LDIF.LCARD_NAMES.CH1MAX]]):     # Imin = c1 ch1_min - c2 ch2_max
                         myDataPiece["Imin"] = self.c1*lcard_data[LDIF.LCARD_NAMES.CH0MIN] - self.c2*lcard_data[LDIF.LCARD_NAMES.CH1MAX]
-                if {LDIF.LCARD_NAMES.CH0STD, LDIF.LCARD_NAMES.CH1STD}.issubset(lcard_data.index):     # sigma = c1 sigma_1 - c2 sigma_2
+                if not(None in [lcard_data[LDIF.LCARD_NAMES.CH0STD], lcard_data[LDIF.LCARD_NAMES.CH1STD]]):     # sigma = c1 sigma_1 - c2 sigma_2
                         myDataPiece["sigmaI"] = np.sqrt((self.c1*lcard_data[LDIF.LCARD_NAMES.CH0STD])**2 + (self.c2*lcard_data[LDIF.LCARD_NAMES.CH1STD])**2)
                 self.myData = pd.concat([self.myData, myDataPiece])
                 # data processing : save to file
                 if not(self._MeasurementsFile.closed):
-                        self._MeasurementsFile.write(b"\n")
-                        np.savetxt(self._MeasurementsFile, myDataPiece, fmt = '%s')
-
+                        np.savetxt(self._MeasurementsFile, myDataPiece, fmt = '%s', delimiter = ";")
                 # update GUIs : Plot and LCDs
                 self.updatePlot()
                 self.myLCD_Filament.Update_U_I(korad_data[DKorad.KORAD_NAMES.VOLTAGE],
@@ -219,6 +233,7 @@ class FilamentAnodeTab(object):
                                           Y_x[y_label][max(0, Y_x.shape[0] - amount):Y_x.shape[0]])
                 self.Y_x_plot.setAxisLabel(self.PlotXAxis_ComboBox.currentText(),
                                            self.PlotYAxis_ComboBox.currentText())
+                
 
         def onCloseEvent(self):
                 print("Disconnecting from all devices")

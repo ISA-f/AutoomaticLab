@@ -69,13 +69,24 @@ class Lcard_Interface_FullBuffers(object):
                 return
 
         def clearData(self):
-            self.myData = np.array()
-            self.onDataUpdate(self.myData)
+            print("LcardIFFB.clearData")
+            try:
+                    self.myData = np.random.random((20,2))
+                    self.onDataUpdate(self.myData)
+            except Exception as e:
+                    print(e)
 
         def getIsActiveInterface(self):
             if self.myLcardController is None:
                 return False
             return self.myLcardController.IsActiveController
+
+        def getParameters(self):
+            d = self.myLcardController.getParameters()
+            d["LcardIFFB.myData.shape"] = None
+            if not(self.myData is None):
+                    d["LcardIFFB.myData.shape"] = self.myData.shape
+            return d
 
 
 def test():
