@@ -12,12 +12,12 @@ import Lcard_syncdController
 
 
 
-tests = [Lcard_EmptyDevice.test, Device_Korad.test, # Devices
-         LcardDataInterface.test,                   # Device Interfaces
-         Lcard_syncdController.test, Lcard_IF_FullBuffers.test,
-         Tab_Filament_and_Anode.test,               # GUI
-         #Tab_Device_Connections.test,
-         Tab_Lcard_VAC_GUI.test,
+tests = [#Lcard_EmptyDevice.test, Device_Korad.test, # Devices
+         #LcardDataInterface.test,                   # Device Interfaces
+         #Lcard_syncdController.test, Lcard_IF_FullBuffers.test,
+         #Tab_Filament_and_Anode.test,               # GUI
+         Tab_Device_Connections.test,
+         #Tab_Lcard_VAC_GUI.test,
          Tab_Device_Manager.test
          ]
 
@@ -28,6 +28,7 @@ if __name__ == "__main__":
         try:
             itest()
             print(">> success")
+            a = input()
             print()
         except Exception as e:
             print(">>", e)

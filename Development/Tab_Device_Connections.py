@@ -41,17 +41,41 @@ class TabDeviceConnections(object):
                 self.QLineEdit_FilenameKorad_ini = QtWidgets.QLineEdit(parent = self.centralwidget)
                 self.QLineEdit_FilenameKorad_ini.setStyleSheet("font: 75 12pt \"Tahoma\";")
                 self.QLineEdit_FilenameKorad_ini.setText("Korad.ini")
+                # Korad : Set_I 
+                self.pushButton_Set_I = QtWidgets.QPushButton(self.centralwidget)
+                self.pushButton_Set_I.setStyleSheet("font: 75 18pt \"Tahoma\";")
+                self.pushButton_Set_I.setText("Set I")
+                self.pushButton_Set_I.setEnabled(False)
+                self.QLineEdit_Set_I = QtWidgets.QLineEdit(parent = self.centralwidget)
+                self.QLineEdit_Set_I.setStyleSheet("font: 75 18pt \"Tahoma\";")
+                # Korad : Set_U
+                self.pushButton_Set_U = QtWidgets.QPushButton(self.centralwidget)
+                self.pushButton_Set_U.setStyleSheet("font: 75 18pt \"Tahoma\";")
+                self.pushButton_Set_U.setText("Set U")
+                self.pushButton_Set_U.setEnabled(False)
+                self.QLineEdit_Set_U = QtWidgets.QLineEdit(parent = self.centralwidget)
+                self.QLineEdit_Set_U.setStyleSheet("font: 75 18pt \"Tahoma\";")
+                
                 # Korad : Layout
                 self.QLayout_Korad = QtWidgets.QVBoxLayout()
                 self.QLayout_Korad.addWidget(self.QLabel_FilenameKorad_ini)
                 self.QLayout_Korad.addWidget(self.QLineEdit_FilenameKorad_ini)
                 self.QLayout_Korad.addWidget(self.QpButton_connectKorad)
+                hbox_I = QtWidgets.QHBoxLayout()
+                hbox_I.addWidget(self.pushButton_Set_I)
+                hbox_I.addWidget(self.QLineEdit_Set_I)
                 
                 # Lcard : Connect Button
                 self.QpButton_connectLcard = QtWidgets.QPushButton(self.centralwidget)
                 self.QpButton_connectLcard.setStyleSheet("font: 75 18pt \"Tahoma\";")
                 self.QpButton_connectLcard.setText("Connect Lcard")
                 self.QpButton_connectLcard.clicked.connect(self.onPushLcard)
+                # Lcard : Start Stop Button
+                self.QpButton_StartStopLcard = QtWidgets.QPushButton(self.centralwidget)
+                self.QpButton_StartStopLcard.setStyleSheet("font: 75 18pt \"Tahoma\";")
+                self.QpButton_StartStopLcard.setText("Start Lcard")
+                self.QpButton_StartStopLcard.setEnabled(False)
+                self.QpButton_StartStopLcard.clicked.connect(self.onPushStartStopLcard)
                 # Lcard : Config filename choice
                 self.QLabel_FilenameLcard_ini = QtWidgets.QLabel("Lcard.ini filename:", self.centralwidget)
                 self.QLabel_FilenameLcard_ini.setStyleSheet("font: 75 15pt \"Tahoma\";")
@@ -63,6 +87,7 @@ class TabDeviceConnections(object):
                 self.QLayout_Lcard.addWidget(self.QLabel_FilenameLcard_ini)
                 self.QLayout_Lcard.addWidget(self.QLineEdit_FilenameLcard_ini)
                 self.QLayout_Lcard.addWidget(self.QpButton_connectLcard)
+                self.QLayout_Lcard.addWidget(self.QpButton_StartStopLcard)
                 
                 # Layout
                 self.QLayout_General = QtWidgets.QHBoxLayout()
@@ -70,8 +95,15 @@ class TabDeviceConnections(object):
                 self.QLayout_General.addLayout(self.QLayout_Korad)
                 self.centralwidget.setLayout(self.QLayout_General)
 
+                self.centralwidget.setMaximumSize(600, 200)
                 return self.centralwidget
 
+        def onCloseEvent(self):
+                print("Disconnecting from all devices")
+                self.disconnectKorad()
+                self.disconnectLcard()
+        
+        # ------------ Korad --------------------
         def onPushKorad(self):
             if self.getIsKoradConnected():
                 self.disconnectKorad()
@@ -79,12 +111,15 @@ class TabDeviceConnections(object):
                 self.connectKorad()
             return
 
-        def onPushLcard(self):
-            if self.getIsLcardConnected():
-                self.disconnectLcard()
+        def getIsKoradConnected(self):
+            return not(self.myKorad_Device.ser is None)
+        
+        def updateIsKoradConnected(self):
+            self.QLineEdit_FilenameKorad_ini.setEnabled(not(self.getIsKoradConnected()))
+            if self.getIsKoradConnected():
+                self.QpButton_connectKorad.setText("Disconnect Korad")
             else:
-                self.connectLcard()
-            return
+                self.QpButton_connectKorad.setText("Connect Korad")
 
         def connectKorad(self):
             self.disconnectKorad()
@@ -99,46 +134,57 @@ class TabDeviceConnections(object):
             self.myKorad_Device.DisconnectFromPhysicalDevice()
             self.updateIsKoradConnected()
 
+        # ------------ Lcard --------------------
+        def onPushLcard(self):
+            if self.getIsLcardConnected():
+                self.disconnectLcard()
+            else:
+                self.connectLcard()
+            return
+
+        def onPushStartStopLcard(self):
+            if self.QpButton_StartStopLcard.text() == "Start Lcard":
+                    self.myLcard_Device.startMeasurements()
+            else:
+                    self.myLcard_Device.finishMeasurements()
+            self.updateIsLcardActiveMeasurements()
+
         def connectLcard(self):
             self.disconnectLcard()
             try:
                 self.myLcard_Device.ConfigFilename = self.QLineEdit_FilenameLcard_ini.text()
-                self.myLcard_Device.IsConnected = False
                 self.myLcard_Device.connectToPhysicalDevice()
                 self.myLcard_Device.loadConfiguration()
             except Exception as e:
                 print(e)
                 self.myLcard_Device.IsConnected = False
             self.updateIsLcardConnected()
-
+        
         def disconnectLcard(self):
             self.myLcard_Device.disconnectFromPhysicalDevice()
             self.updateIsLcardConnected()
 
-        def getIsKoradConnected(self):
-            return not(self.myKorad_Device.ser is None)
-
         def getIsLcardConnected(self):
             return self.myLcard_Device.IsConnected
-        
-        def updateIsKoradConnected(self):
-            self.QLineEdit_FilenameKorad_ini.setEnabled(not(self.getIsKoradConnected()))
-            if self.getIsKoradConnected():
-                self.QpButton_connectKorad.setText("Disconnect Korad")
-            else:
-                self.QpButton_connectKorad.setText("Connect Korad")
+
+        def getIsLcardActiveMeasurements(self):
+            return self.myLcard_Device.IsActiveMeasurements
 
         def updateIsLcardConnected(self):
+            self.updateIsLcardActiveMeasurements()
             self.QLineEdit_FilenameLcard_ini.setEnabled(not(self.getIsLcardConnected()))
             if self.getIsLcardConnected():
                 self.QpButton_connectLcard.setText("Disconnect Lcard")
             else:
                 self.QpButton_connectLcard.setText("Connect Lcard")
 
-        def onCloseEvent(self):
-                print("Disconnecting from all devices")
-                self.disconnectKorad()
-                self.disconnectLcard()
+        def updateIsLcardActiveMeasurements(self):
+            self.QpButton_StartStopLcard.setEnabled(self.getIsLcardConnected())
+            if self.getIsLcardActiveMeasurements():
+                    self.QpButton_StartStopLcard.setText("Stop Lcard")
+            else:
+                    self.QpButton_StartStopLcard.setText("Start Lcard")
+                
 
 
 def test():

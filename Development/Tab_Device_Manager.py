@@ -15,11 +15,14 @@ from Tab_Device_Connections import TabDeviceConnections
 class TabDeviceManager(object):
         def __init__(self):
                 self.DeviceConnections = TabDeviceConnections()
+                
                 self.FilamentAnode = FilamentAnodeTab(
                                 lcard_device = self.DeviceConnections.myLcard_Device,
                                 korad_device = self.DeviceConnections.myKorad_Device)
+                
                 self.LcardVAC = LcardVACPlot_Interface(
                                 Lcard_device = self.DeviceConnections.myLcard_Device)
+                
 
         def setupUi(self):
                 self.tabs = QtWidgets.QTabWidget()

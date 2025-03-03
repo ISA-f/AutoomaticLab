@@ -49,8 +49,9 @@ class LcardSyncdController:
 def test():
     print("Lcard_syncdController test")
     def example(syncd):
-        if syncd > 50000:
-            print("syncd > 50000 !!!")
+        print(syncd)
+        #if syncd > 25000:
+        #    print("syncd > 25000 !!!")
         return
     lcard = LcardE2010B_EmptyDevice("LcardE2010B.ini")
     lcard_controller = LcardSyncdController(lcard)
@@ -58,7 +59,7 @@ def test():
     lcard.connectToPhysicalDevice()
     lcard.loadConfiguration()
     lcard.startMeasurements()
-    lcard_controller.startController(example, 0.5)
+    lcard_controller.startController(example, 0.03)
     
     time.sleep(10)
     

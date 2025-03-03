@@ -1,130 +1,124 @@
+#------------------------ general imports -----------------------------------
+
+import configparser
+
+#------------------------ Qt and GUI imports --------------------------------
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Device_Korad import Korad
-import pandas as pd
 
-class Korad_Interface2(object):
-        def __init__(self, centralwidget):
-                self.centralwidget = centralwidget
-                self._translate = QtCore.QCoreApplication.translate
-                self.myKorad = None
+#------------------------ Device imports ------------------------------------
+import Device_Korad as DKorad
+
+
+class GUI_Korad_Connection(object):
+        def __init__(self):
+            # device with hardcoded default ini:
+            self.myKorad_Device = DKorad.Korad("Korad.ini")
+
+        def __del__(self):
+            self.myKorad_Device.DisconnectFromPhysicalDevice()
+
+        def setupUi(self):
+            self.centralwidget = QtWidgets.QWidget()
+            # Connect Button
+            self.QpButton_connect = QtWidgets.QPushButton(self.centralwidget)
+            self.QpButton_connect.setStyleSheet("font: 75 18pt \"Tahoma\";")
+            self.QpButton_connect.setText("Connect Korad")
+            self.QpButton_connect.clicked.connect(self.onPushConnect)
+            # Config filename choice
+            self.QLabel_Filename_ini = QtWidgets.QLabel("Korad.ini filename:", self.centralwidget)
+            self.QLabel_Filename_ini.setStyleSheet("font: 75 15pt \"Tahoma\";")
+            self.QLineEdit_Filename_ini = QtWidgets.QLineEdit(parent = self.centralwidget)
+            self.QLineEdit_Filename_ini.setStyleSheet("font: 75 12pt \"Tahoma\";")
+            self.QLineEdit_Filename_ini.setText("Korad.ini")
+            # Button Set_I 
+            self.QpButton_Set_I = QtWidgets.QPushButton(self.centralwidget)
+            self.QpButton_Set_I.setStyleSheet("font: 75 18pt \"Tahoma\";")
+            self.QpButton_Set_I.setText("Set I")
+            self.QpButton_Set_I.setEnabled(False)
+            self.QLineEdit_Set_I = QtWidgets.QLineEdit(parent = self.centralwidget)
+            self.QLineEdit_Set_I.setStyleSheet("font: 75 18pt \"Tahoma\";")
+            # Button Set_U
+            self.QpButton_Set_U = QtWidgets.QPushButton(self.centralwidget)
+            self.QpButton_Set_U.setStyleSheet("font: 75 18pt \"Tahoma\";")
+            self.QpButton_Set_U.setText("Set U")
+            self.QpButton_Set_U.setEnabled(False)
+            self.QLineEdit_Set_U = QtWidgets.QLineEdit(parent = self.centralwidget)
+            self.QLineEdit_Set_U.setStyleSheet("font: 75 18pt \"Tahoma\";")
+                
+            # Layout
+            self.QLayout_General = QtWidgets.QVBoxLayout()
+            self.QLayout_General.addWidget(self.QLabel_Filename_ini)
+            self.QLayout_General.addWidget(self.QLineEdit_Filename_ini)
+            self.QLayout_General.addWidget(self.QpButton_connectKorad)
+            hbox_I = QtWidgets.QHBoxLayout()
+            hbox_I.addWidget(self.pushButton_Set_I)
+            hbox_I.addWidget(self.QLineEdit_Set_I)
+               
+            # Lcard : Start Stop Button
+            self.QpButton_StartStopLcard = QtWidgets.QPushButton(self.centralwidget)
+            self.QpButton_StartStopLcard.setStyleSheet("font: 75 18pt \"Tahoma\";")
+            self.QpButton_StartStopLcard.setText("Start Lcard")
+            self.QpButton_StartStopLcard.setEnabled(False)
+            self.QpButton_StartStopLcard.clicked.connect(self.onPushStartStopLcard)
+                
+            self.centralwidget.setLayout(self.QLayout_General)
+            self.centralwidget.setMaximumSize(600, 200)
+            return self.centralwidget
         
-        def SetupUI(self):
-                self.pushButton_Set_I = QtWidgets.QPushButton(self.centralwidget)
-                self.pushButton_Set_I.setGeometry(QtCore.QRect(700, 140, 151, 51))
-                self.pushButton_Set_I.setStyleSheet("font: 75 18pt \"Tahoma\";")
-                self.pushButton_Set_I.setObjectName("Set I")
-                self.pushButton_Set_I.setText(self._translate("MainWindow", "Set I"))
-                self.pushButton_Set_I.setEnabled(False)
-                self.QLineEdit_Set_I = QtWidgets.QLineEdit(parent = self.centralwidget)
-                self.QLineEdit_Set_I.setGeometry(QtCore.QRect(900, 140, 151, 51))
-                self.QLineEdit_Set_I.setStyleSheet("font: 75 18pt \"Tahoma\";")
-                self.QLineEdit_Set_I.setObjectName("Set I Line")
-                hbox_I = QtWidgets.QHBoxLayout()
-                hbox_I.addWidget(self.pushButton_Set_I)
-                hbox_I.addWidget(self.QLineEdit_Set_I)
-                
-                self.pushButton_Connect_Disconnect_Korad = QtWidgets.QPushButton(self.centralwidget)
-                self.pushButton_Connect_Disconnect_Korad.setGeometry(QtCore.QRect(900, 40, 300, 51))
-                self.pushButton_Connect_Disconnect_Korad.setStyleSheet("font: 75 18pt \"Tahoma\";")
-                self.pushButton_Connect_Disconnect_Korad.setObjectName("Connect_Disconnect Korad")
-                self.pushButton_Connect_Disconnect_Korad.setText(self._translate("MainWindow", "Connect Korad"))
-                
-                self.pushButton_Set_U = QtWidgets.QPushButton(self.centralwidget)
-                self.pushButton_Set_U.setGeometry(QtCore.QRect(700, 440, 151, 51))
-                self.pushButton_Set_U.setStyleSheet("font: 75 18pt \"Tahoma\";")
-                self.pushButton_Set_U.setObjectName("Set U")
-                self.pushButton_Set_U.setText(self._translate("MainWindow", "Set U"))
-                self.pushButton_Set_U.setEnabled(False)
-                self.QLineEdit_Set_U = QtWidgets.QLineEdit(parent = self.centralwidget)
-                self.QLineEdit_Set_U.setGeometry(QtCore.QRect(900, 140, 151, 51))
-                self.QLineEdit_Set_U.setStyleSheet("font: 75 18pt \"Tahoma\";")
-                self.QLineEdit_Set_U.setObjectName("Set U Line")
-                hbox_U = QtWidgets.QHBoxLayout()
-                hbox_U.addWidget(self.pushButton_Set_U)
-                hbox_U.addWidget(self.QLineEdit_Set_U)
-                
-                vbox = QtWidgets.QVBoxLayout()
-                vbox.addWidget(self.pushButton_Connect_Disconnect_Korad)
-                vbox.addLayout(hbox_I)
-                vbox.addLayout(hbox_U)
-                self.centralwidget.setLayout(vbox)
+        def onPushConnect(self):
+            if self.getIsKoradConnected():
+                self.disconnectKorad()
+            else:
+                self.connectKorad()
+            return
 
-                self.pushButton_Connect_Disconnect_Korad.clicked.connect(self.Push_Connect_Disconnect_Button)
-                self.pushButton_Set_I.clicked.connect(self.Set_I_QLineEdit)
-                self.pushButton_Set_U.clicked.connect(self.Set_U_QLineEdit)
-
-        def Push_Connect_Disconnect_Button(self):
-                self.Connect_Disconnect(self.pushButton_Connect_Disconnect_Korad.text() == "Connect Korad")
-
-        def Connect_Disconnect(self, connect: bool):
-                if connect:
-                        print("Try connect Korad")
-                        if not(self.myKorad):
-                                self.myKorad = Korad('Korad.ini')
-                        try:
-                                self.myKorad.ConnectToPhysicalDevice()
-                                self.pushButton_Connect_Disconnect_Korad.setText(self._translate("MainWindow", "Disconnect Korad"))
-                        except Exception as e:
-                                print(e)
-                elif self.myKorad and self.myKorad.ser:
-                        self.myKorad.DisconnectFromPhysicalDevice()
-                        self.pushButton_Connect_Disconnect_Korad.setText(self._translate("MainWindow", "Connect Korad"))
-
-                # updating GUI
-                if self.myKorad and self.myKorad.ser:
-                        self.pushButton_Set_I.setEnabled(bool(self.myKorad.ser))
-                        self.pushButton_Set_U.setEnabled(bool(self.myKorad.ser))
-
-        def Start_Finish(self, start: bool):
-                if not(self.myKorad):
-                        return
-                if start:
-                        try:
-                                self.StartExperiment()
-                                #self.pushButton_Connect_Disconnect_Korad.setText(self._translate("MainWindow", "Disconnect Korad"))
-                        except Exception as e:
-                                print(e)
-                                a = input()
-                else:
-                        self.FinishExperiment()
-
-        def Set_I_QLineEdit(self):
-                self.Set_I(self.QLineEdit_Set_I.text())
-                return
-
-        def Set_U_QLineEdit(self):
-                self.Set_U(self.QLineEdit_Set_U.text())
-                return
+        def getIsConnected(self):
+            return not(self.myKorad_Device.ser is None)
         
-        def Set_I(self, value):
-                s = None
-                try:
-                        s = float(value)
-                except Exception as e:
-                        pass
-                if(s):
-                        self.myKorad.Set_v_i(i = s)
-                return
+        def updateIsKoradConnected(self):
+            self.QLineEdit_FilenameKorad_ini.setEnabled(not(self.getIsConnected()))
+            if self.getIsConnected():
+                self.QpButton_connectKorad.setText("Disconnect Korad")
+            else:
+                self.QpButton_connectKorad.setText("Connect Korad")
 
-        def Set_U(self, value):
-                s = None
-                try:
-                        s = float(value)
-                except Exception as e:
-                        pass
-                if(s):
-                        self.myKorad.Set_v_i(v = s)
-                return
+        def connectKorad(self):
+            self.disconnectKorad()
+            try:
+                self.myKorad_Device.ConfigFilename = self.QLineEdit_FilenameKorad_ini.text()
+                self.myKorad_Device.ConnectToPhysicalDevice()
+            except Exception as e:
+                print(e)
+            self.updateIsKoradConnected()
 
-        def TakeMeasurements(self):
-            if self.myKorad and self.myKorad.ser :
-                return self.myKorad.TakeMeasurements()
-            return pd.Series([None, None, None])
+        def disconnectKorad(self):
+            self.myKorad_Device.DisconnectFromPhysicalDevice()
+            self.updateIsKoradConnected()
 
-        def StartExperiment(self):
-                if self.myKorad and self.myKorad.ser :
-                        self.myKorad.StartExperiment()
+        def onCloseEvent(self):
+            self.disconnectKorad()
 
-        def FinishExperiment(self):
-                if self.myKorad:
-                        self.myKorad.FinishExperiment()
+
+def test():
+    print("TabDeviceConnections test")
+    import sys 
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = MainWindow_withCloseEvent()
+    ui = TabDeviceConnections()
+    centralwidget = ui.setupUi()
+    MainWindow.setCentralWidget(centralwidget)
+    MainWindow.CloseEventListeners.append(ui.onCloseEvent)
+    MainWindow.show()
+    app.exec_()
+
+    print(ui.myKorad_Device.ConfigFilename)
+    print(ui.myLcard_Device.ConfigFilename)
+
+if __name__ == "__main__":
+    try:
+        test()
+        print(">> success")
+    except Exception as e:
+        print(e)
+        a = input()
+    

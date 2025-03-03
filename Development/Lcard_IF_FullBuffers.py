@@ -46,22 +46,36 @@ class Lcard_Interface_FullBuffers(object):
                 return
 
         def onControllerCall(self, syncd):
-                if (self.last_syncd < self.half_buffer) and (syncd < self.half_buffer):
-                        return # сейчас заполняется первый полубуффер
-                if (self.last_syncd > self.half_buffer) and (syncd > self.half_buffer):
-                        return # сейчас заполняется второй полубуффер
-                self.myLcardDataInterface.readBuffer()
-                LDIF.cropBuffer(lcard_IF = self.myLcardDataInterface,
-                                start = self.last_syncd,
-                                end = self.myLcardDataInterface.syncd)
-                if not(self.myData):
-                         self.myData = self.myLcardDataInterface.data
-                else:
-                        self.myData = np.concatenate([self.myData,
-                                                      self.myLcardDataInterface.data],
-                                                     axis = 1)
-                self.last_syncd = self.myLcardDataInterface.syncd
-                self.onDataUpdate(self.Data)
+                print("start onController call")
+                try:
+                        if (self.last_syncd < self.half_buffer) and (syncd < self.half_buffer):
+                                return # сейчас заполняется первый полубуффер
+                        print(">>1")
+                        if (self.last_syncd > self.half_buffer) and (syncd > self.half_buffer):
+                                return # сейчас заполняется второй полубуффер
+                        print(">>2")
+                        self.myLcardDataInterface.readBuffer()
+                        print(">>3")
+                        LDIF.cropBuffer(lcard_IF = self.myLcardDataInterface,
+                                        start = self.last_syncd,
+                                        end = self.myLcardDataInterface.syncd)
+                        print(">>4")
+                        if self.myData is None:
+                                print(">>4.1")
+                                self.myData = self.myLcardDataInterface.data
+                        else:
+                                print(">>4.2")
+                                self.myData = np.concatenate([self.myData,
+                                                              self.myLcardDataInterface.data],
+                                                             axis = 1)
+                        print(">>5")
+                        self.last_syncd = self.myLcardDataInterface.syncd
+                        print(">>6")
+                        self.onDataUpdate(self.myData)
+                        print(">>7")
+                except Exception as e:
+                        print(e)
+                print("finish onControllerCall")
                 return
 
         def finishFullBuffersRead(self):
@@ -69,12 +83,7 @@ class Lcard_Interface_FullBuffers(object):
                 return
 
         def clearData(self):
-            print("LcardIFFB.clearData")
-            try:
-                    self.myData = np.random.random((20,2))
-                    self.onDataUpdate(self.myData)
-            except Exception as e:
-                    print(e)
+            self.myData = None
 
         def getIsActiveInterface(self):
             if self.myLcardController is None:
@@ -91,22 +100,29 @@ class Lcard_Interface_FullBuffers(object):
 
 def test():
     print("Lcard_IF_FullBuffers test")
-
-    def example():
-        print("example() called")
+    datas = []
+    def example(data):
+        datas.append(data)
     
     import Lcard_EmptyDevice
+    import matplotlib.pyplot as plt
+    
     lcard = Lcard_EmptyDevice.LcardE2010B_EmptyDevice("LcardE2010B.ini")
     lcard.connectToPhysicalDevice()
     lcard.loadConfiguration()
     lcard.startMeasurements()
     LcardIFFB = Lcard_Interface_FullBuffers(lcard, example)
-    LcardIFFB.startFullBuffersRead(ThreadSleepTime = 1)
-    time.sleep(5)
+    LcardIFFB.startFullBuffersRead(ThreadSleepTime = 0.03)
+    time.sleep(3)
     LcardIFFB.finishFullBuffersRead()
 
     lcard.finishMeasurements()
     lcard.disconnectFromPhysicalDevice()
+    for idata in datas:
+        print(idata.shape)
+        plt.plot(np.arange(len(idata[0])), idata[0])
+    plt.scatter(np.arange(len(LcardIFFB.myData[0])), LcardIFFB.myData[0]-0.12, s = 2)
+    plt.show()
 
 if __name__ == "__main__":
     try:

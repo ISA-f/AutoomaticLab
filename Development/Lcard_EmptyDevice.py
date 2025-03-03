@@ -1,6 +1,9 @@
 import configparser
 import time
 import numpy as np
+from threading import Lock
+
+import Abstract_Device
 
 from lcomp.lcomp import LCOMP
 from lcomp.ldevioctl import (E2010, E2010B, L_ADC_PARAM,
@@ -8,8 +11,6 @@ from lcomp.ldevioctl import (E2010, E2010B, L_ADC_PARAM,
                              L_ASYNC_TTL_INP, L_ASYNC_TTL_OUT, L_EVENT_ADC_BUF,
                              L_STREAM_ADC, L_USER_BASE, WASYNC_PAR, WDAQ_PAR)
 from lcomp.device import e2010
-from threading import Lock
-
 '''
 Перед использованием и модификацией классов Lcard на python,
 прочитайте опыт неприятных ошибок:
@@ -21,7 +22,7 @@ EnableCorrection()
 StartLDevice()
 
 Всегда должны находиться в одном Thread.
-Нарушение этого правила приводит вас к синему экрану при запуске SetParametersStream
+Нарушение этого правила приведет вас к синему экрану при запуске SetParametersStream
 и 2 часам поиска ошибок без возможности дебага.
 '''
 
@@ -35,12 +36,17 @@ class LcardE2010B_EmptyDevice(object):
         self.ldev = None
         self.plDescr = None
         self.data_ptr = None
-        self.syncd = None
+        self.syncd_ptr = None
         self.IsActiveMeasurements = False
         self.IsConnected = False
         self.BufferMutex = Lock()
         self.SyncdMutex = Lock()
         self.ListenersAmount = 0
+        return
+
+    def __del__(self):
+        if self.IsConnected:
+            self.disconnectFromPhysicalDevice()
         return
 
     def connectToPhysicalDevice(self, slot: int = 0):    
@@ -63,8 +69,11 @@ class LcardE2010B_EmptyDevice(object):
         return True
 
     def disconnectFromPhysicalDevice(self):
+        if not(self.IsConnected):
+            return
         self.finishMeasurements()
-        if self.ldev and self.IsConnected:
+        if self.ldev:
+            print("ldev.CloseLDevice call")
             self.ldev.CloseLDevice()
             print("Lcard disconnected")
         self.IsConnected = False
@@ -73,17 +82,12 @@ class LcardE2010B_EmptyDevice(object):
     def loadConfiguration(self):
         if not(self.IsConnected):
             return
-        if self.IsActiveMeasurements:
-            print("Lcard: tried to LoadConfiguration while IsActiveMeasurements == True")
-            return
-        
         f = open(self.ConfigFilename)
         config = configparser.ConfigParser()
         config.read_file(f)
-        
         if (config["Validation"]["BoardType"] != "E2010B"):
-            raise NameError("Lcard E2010B: invalid BoardType ini file: ")
-        
+            print("Lcard E2010B: invalid BoardType ini file: ")
+            return
         ADCpar = config["ADC_Parameters"]
         self.adcPar = WDAQ_PAR()
         self.adcPar.t4.s_Type = L_ADC_PARAM                                     # Для E2010B:
@@ -95,13 +99,11 @@ class LcardE2010B_EmptyDevice(object):
         self.adcPar.t4.dKadr = ADCpar.getfloat("dKadr")                         # 0.001
         self.adcPar.t4.SynchroType = e2010.dSynchroType[ADCpar["SynchroType"]]  # e2010.INT_START_TRANS
         self.adcPar.t4.SynchroSrc = e2010.dSynchroSrc[ADCpar["SynchroSrc"]]     # e2010.INT_CLK_TRANS
-        
         MaskPar = ADCpar["AdcIMask"].split()
         self.adcPar.t4.AdcIMask = e2010.dCH_BITS[MaskPar[0]]
         for j in range(1, len(MaskPar)):
             self.adcPar.t4.AdcIMask = self.adcPar.t4.AdcIMask | e2010.dCH_BITS[MaskPar[j]]
             # | e2010.SIG_1 | e2010.V10_1 # | e2010.SIG_2 | e2010.V03_2 # | e2010.GND_3
-        
         self.adcPar.t4.NCh = ADCpar.getint("NCh")                               # 1 - 4
         for i in range(self.adcPar.t4.NCh):
             self.adcPar.t4.Chn[i] = e2010.dChn[i]                               # e2010.CH_0
@@ -121,7 +123,7 @@ class LcardE2010B_EmptyDevice(object):
             return
         self.IsActiveMeasurements = True
         self.buffer_size = self.ldev.RequestBufferStream(size=131072, stream_id=L_STREAM_ADC)
-        self.data_ptr, self.syncd = self.ldev.SetParametersStream(self.adcPar.t3, self.buffer_size)
+        self.data_ptr, self.syncd_ptr = self.ldev.SetParametersStream(self.adcPar.t3, self.buffer_size)
         self.ldev.EnableCorrection(True)
         self.ldev.InitStartLDevice()
         self.ldev.StartLDevice()
@@ -131,7 +133,6 @@ class LcardE2010B_EmptyDevice(object):
         if not(self.IsConnected):
             return
         if self.ldev:
-            print("ldev.StopLDevice() call")
             self.ldev.StopLDevice()
         self.IsActiveMeasurements = False
         return
@@ -142,18 +143,20 @@ class LcardE2010B_EmptyDevice(object):
             return None, None
         self.BufferMutex.acquire()
         self.SyncdMutex.acquire()
-        syncd = self.syncd()
+        syncd = self.syncd_ptr()
         data = e2010.GetDataADC(self.adcPar.t4, self.plDescr, # считываем буффер с Lcard
                             self.data_ptr, self.buffer_size)
         self.SyncdMutex.release()
         self.BufferMutex.release()
         return data, syncd
 
+    
     def syncd(self):
         if not(self.IsConnected) or not(self.IsActiveMeasurements):
+            print("tried syncd() when", self.IsConnected, self.IsActiveMeasurements)
             return
         self.SyncdMutex.acquire()
-        syncd = self.syncd()
+        syncd = self.syncd_ptr()
         self.SyncdMutex.release()
         return syncd
 
@@ -168,12 +171,8 @@ class LcardE2010B_EmptyDevice(object):
             self.finishMeasurements()
             self.ListenersAmount = 0
 
-    def __del__(self):
-        self.disconnectFromPhysicalDevice()
-        return
-
     def getParameters(self):
-        d = {"Connected" : self.IsConnected}
+        d = {"Device" : "LcardE2010B", "Connected" : self.IsConnected}
         if not(self.IsConnected):
             return d
         d["IsActiveMeasurements"] = self.IsActiveMeasurements
@@ -195,21 +194,24 @@ class LcardE2010B_EmptyDevice(object):
         d["AdcEna"] = self.adcPar.t4.AdcEna
         return d
 
-
 def test():
     print("LcardE2010B EmptyDevice test")
     myLcard = LcardE2010B_EmptyDevice("LcardE2010B.ini")
     myLcard.connectToPhysicalDevice(slot=0)
     myLcard.loadConfiguration()
-        
+    print(myLcard.getParameters())
+    print()
     myLcard.startMeasurements()
     data, syncd = myLcard.readBuffer()
+    print("data.shape, syncd:", data.shape, syncd)
     time.sleep(3)
     data, syncd = myLcard.readBuffer()
+    print("data.shape, syncd:", data.shape, syncd)
     myLcard.finishMeasurements()
     myLcard.disconnectFromPhysicalDevice()
     if data is None:
         return
+    print(">>", np.mean(data,axis=1), np.std(data,axis=1))
     print(">> data.shape, syncd:",data.shape, syncd)
     return
 
@@ -217,6 +219,4 @@ if __name__ == "__main__":
     try:
         test()
     except Exception as e:
-        print(">>",e)
-
-
+        print(">>", e)

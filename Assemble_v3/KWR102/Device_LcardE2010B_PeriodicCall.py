@@ -308,8 +308,9 @@ if __name__ == "__main__":
         myLcard.StartMeasurements("Lcard_filename.log")
         print(time.time())
         time.sleep(3)
-        #for i in range(10000):
-        #    x = myLcard.TakeMeasurements()
+        for i in range(10000):
+            x = myLcard.TakeMeasurements(8000)
         print(time.time())
+        print(np.mean(x), np.std(x))
         myLcard.FinishMeasurements()
 

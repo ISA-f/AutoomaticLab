@@ -145,6 +145,9 @@ def test():
     calculateAverage(lcard_IF)
     print(lcard_IF.data)
     cropToRequestedBuffer(lcard_IF2, 8000)
+    import matplotlib.pyplot as plt
+    plt.scatter(np.arange(len(lcard_IF2.data[0])), lcard_IF2.data[0])
+    plt.show()
 
 
 if __name__ == "__main__":

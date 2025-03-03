@@ -29,11 +29,20 @@ def columns_to_csv_string(columns):
     for column in columns:
         s += str(column) + ";"
     return (s + ";CommandTable\n")
+
+def dict_parameters_to_csv(file, parameters):
+    s1 = ""
+    s2 = ""
+    for i in parameters.keys():
+        s1 += str(i) + ";"
+        s2 += str(parameters[i]) + ";"
+    file.write(str.encode(s1 + "\n"))
+    file.write(str.encode(s2 + "\n"))
+    return file
         
         
 
 class FilamentAnodeTab(object):
-        
         def __init__(self, lcard_device, korad_device):
                 self.IsActiveMeasurements = False
                 self.timer = None
@@ -178,6 +187,10 @@ class FilamentAnodeTab(object):
                                                  dCommand_to_Functor = d,
                                                  onFinish = self.onTableFinish)
                         self._MeasurementsFile = open(self.LogFilename, "ab")
+                        dict_parameters_to_csv(self._MeasurementsFile, self.myKorad.getParameters())
+                        self._MeasurementsFile.write(b"\n")
+                        dict_parameters_to_csv(self._MeasurementsFile, self.myLcardIF.myLcardDevice.getParameters())
+                        self._MeasurementsFile.write(b"\n")
                         self._MeasurementsFile.write(str.encode(columns_to_csv_string(self.myData.columns)))
                 except Exception as e:
                         print(e)

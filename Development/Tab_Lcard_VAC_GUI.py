@@ -2,6 +2,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import time
+from threading import Lock
 
 import Updatable_QTCanvas
 import Lcard_IF_FullBuffers
@@ -25,18 +27,45 @@ class LcardVACPlot_Interface(object):
         def __init__(self, Lcard_device):
             print("Lcard VAC __init__ call")
             self.myLcard_IFFB = Lcard_IF_FullBuffers.Lcard_Interface_FullBuffers(Lcard_device, self.onDataUpdate)
-            self.BufferUpdateTime = 0.1
+            self.BufferUpdateTimePeriod = 0.1
             self.Y_x_plot = None
-            self.LastData = pd.DataFrame()
+            self.LastData = None
+            self.GUIUpdateTimePeriod = 0.5
+            self.GUILastUpdateTime = 0
+            self.ArePlotUpdatesLive = True
             print("Lcard VAC __init__ executed")
 
+        def onPushArePlotUpdatesLive(self):
+            self.setArePlotUpdatesLive(self.QCheckbox_ArePlotUpdatesLive.checkState())
+        
+        def setArePlotUpdatesLive(self, value):
+            self.ArePlotUpdatesLive = value
+            self.QCheckbox_ArePlotUpdatesLive.setCheckState(value)
+            if self.ArePlotUpdatesLive:
+                try:
+                    self._updatePlot()
+                except Exception as e:
+                    print(e)
+        
         def onDataUpdate(self, Data):
-            print("LVAC.onDataUpdate")
-            self.LastData = Data
-            self._updatePlot()
+            try:
+                print("LVAC.onDataUpdate")
+                print(type(Data))
+                self.LastData = Data
+                print(">>1")
+                if self.ArePlotUpdatesLive:
+                    self._updatePlot()
+                return
+                print(">>2")
+            except Exception as e:
+                print(e)
 
         def _getStartEndIndex(self):
-            start, end = 0, self.LastData.shape[0]
+            start = 0
+            if self.LastData is None:
+                end = -1
+            else:
+                end = self.LastData.shape[0]
             try:
                 start = int(self.QLineEdit_ShownData_StartIndex.text())
                 end = int(self.QLineEdit_ShownData_EndIndex.text())
@@ -45,24 +74,36 @@ class LcardVACPlot_Interface(object):
             return start, end
 
         def _updatePlot(self):
+            print("LVAC._updatePlot call")
+            if time.time() - self.GUILastUpdateTime < self.GUIUpdateTimePeriod:
+                    print("too frequent _updatePlot calls")
+                    self.setArePlotUpdatesLive(False)
+            self.LastPlotUpdateTime = time.time()
             if self.Y_x_plot is None:
                 return
             if self.LastData is None:
                 return
-            x_label = self.PlotXAxis_ComboBox.currentText()
-            y_label = self.PlotYAxis_ComboBox.currentText()
-            self.Y_x_plot.setAxisLabel(x_label, y_label)
-            
-            start, end = self._getStartEndIndex()
-            self.QLineEdit_ShownData_StartIndex.setText(str(start))
-            self.QLineEdit_ShownData_EndIndex.setText(str(end))
-            
             try:
+                x_label = self.PlotXAxis_ComboBox.currentText()
+                y_label = self.PlotYAxis_ComboBox.currentText()
+                print(">>2")
+                self.Y_x_plot.setAxisLabel(x_label, y_label)
+                print(">>3")
+                start, end = self._getStartEndIndex()
+                print(">>4")
+                print(start, self.QLineEdit_ShownData_StartIndex)
+                self.QLineEdit_ShownData_StartIndex.setText(str(start))
+                print(">>4.1")
+                print(end, self.QLineEdit_ShownData_EndIndex)
+                self.QLineEdit_ShownData_EndIndex.setText(str(end))
+                print(">>5")
                 x_data = str_to_channel_data(self.LastData, x_label)[start:end]
                 y_data = str_to_channel_data(self.LastData, y_label)[start:end]
+                print(">>6")
                 self.Y_x_plot.update_plot(x_data, y_data)
             except Exception as e:
                 print("LVAC._updatePlot", e)
+            print("LVAC._updatePlot executed")
             return
 
         def _updateIsActiveInterface(self):
@@ -71,7 +112,7 @@ class LcardVACPlot_Interface(object):
 
         def pushStartButton(self):
             print("LVAC.pushStartButton call")
-            self.myLcard_IFFB.startFullBuffersRead(self.BufferUpdateTime)
+            self.myLcard_IFFB.startFullBuffersRead(self.BufferUpdateTimePeriod)
             self._updateIsActiveInterface()
             print("LVAC.pushStartButton executed")
             
@@ -187,6 +228,12 @@ class LcardVACPlot_Interface(object):
             self.QpushButton_Clear.setText(self._translate("MainWindow", "Clear"))
             self.QpushButton_Clear.setEnabled(True)
 
+        # --- ArePlotUpdatesLive ---
+            self.QCheckbox_ArePlotUpdatesLive = QtWidgets.QCheckBox(text = "Live")
+            self.QCheckbox_ArePlotUpdatesLive.setCheckState(self.ArePlotUpdatesLive)
+            self.QCheckbox_ArePlotUpdatesLive.setTristate(False)
+            self.QCheckbox_ArePlotUpdatesLive.stateChanged.connect(self.onPushArePlotUpdatesLive)
+
         # --- Layout ---
             hbox_Start_Stop = QtWidgets.QHBoxLayout()
             hbox_Start_Stop.addWidget(self.QpushButton_Start)
@@ -197,6 +244,7 @@ class LcardVACPlot_Interface(object):
             hbox_Save.addWidget(self.QLineEdit_Save)
 
             vbox_Controls = QtWidgets.QVBoxLayout()
+            vbox_Controls.addWidget(self.QCheckbox_ArePlotUpdatesLive)
             vbox_Controls.addLayout(self.QLayout_PlotComboBoxes)
             vbox_Controls.addLayout(self.QLayout_StartEndIndex)
             vbox_Controls.addLayout(hbox_Start_Stop)
