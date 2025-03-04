@@ -15,12 +15,17 @@ class PyplotWidget(FigureCanvas):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
         super(PyplotWidget, self).__init__(self.fig)
+        self.IsCanvasUpdateRunning0 = False
 
     def update_plot(self, xdata, ydata, s = 15):
+        if self.IsCanvasUpdateRunning0:
+            return
+        self.IsCanvasUpdateRunning0 = True
         self.axes.cla()  # Clear the canvas.
         self.axes.plot(xdata, ydata, color = 'r')
         self.axes.scatter(xdata, ydata, color = 'black', s = s)
         self.draw()
+        self.IsCanvasUpdateRunning0 = False
 
     def setAxisLabel(self, x_label, y_label):
         self.axes.set_xlabel(x_label)
@@ -214,15 +219,15 @@ def test():
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     p = PyplotWidget()
-    p.setAxisLabel("x_hello", "y_hello")
     p.update_plot(data[0], data[1])
+    p.setAxisLabel("x_hello", "y_hello")
     MainWindow.setCentralWidget(p)
     MainWindow.show()
     app.exec_()
 
 if __name__ == "__main__":
     try:
-        test0()
+        test()
         print(">> success")
     except Exception as e:
         print(">>",e)

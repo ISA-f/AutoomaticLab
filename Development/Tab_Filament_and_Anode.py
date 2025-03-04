@@ -138,13 +138,14 @@ class FilamentAnodeTab(object):
                 #self.QLayout_PlotComboBoxes.addWidget(self.PlotYAxis_Label, 1,0)
                 #self.QLayout_PlotComboBoxes.addWidget(self.PlotYAxis_ComboBox, 1,1)
 
+                """
                 #Korad
                 self.myKoradwidget = QtWidgets.QWidget(self.centralwidget)
                 self.myKoradwidget.setObjectName("Korad widget")
                 self.myKoradwidget.setGeometry(QtCore.QRect(0, 400, 300, 300))
                 self.myKoradInterface = Korad_Interface(self.myKoradwidget)
                 self.myKoradInterface.SetupUI()
-                
+                """
                 #Layouts
                 #self.QLayoutLCDs = QtWidgets.QHBoxLayout(self.centralwidget)
                 #self.QLayoutLCDs.addWidget(self.LCD_Filament_widget)

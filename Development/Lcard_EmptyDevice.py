@@ -37,12 +37,22 @@ class LcardE2010B_EmptyDevice(object):
         self.plDescr = None
         self.data_ptr = None
         self.syncd_ptr = None
-        self.IsActiveMeasurements = False
-        self.IsConnected = False
+        self._IsActiveMeasurements = False
+        self._IsConnected = False
         self.BufferMutex = Lock()
         self.SyncdMutex = Lock()
         self.ListenersAmount = 0
         return
+
+    @property
+    def IsConnected(self):
+        return self._IsConnected
+    
+    @property
+    def IsActiveMeasurements(self):
+        if not(self.IsConnected):
+            self._IsActiveMeasurements = False
+        return self._IsActiveMeasurements
 
     def __del__(self):
         if self.IsConnected:
@@ -58,12 +68,14 @@ class LcardE2010B_EmptyDevice(object):
             self.ldev = LCOMP(slot)
             self.ldev.OpenLDevice()
             self.ldev.LoadBios("e2010m")
-            self.IsConnected = self.ldev.PlataTest()
+            self._IsConnected = self.ldev.PlataTest()
             print("Connect to Lcard E2010. PlataTest: {}".format(self.ldev.PlataTest()))
 
             self.slPar = self.ldev.GetSlotParam()
             self.plDescr = self.ldev.ReadPlataDescr()
+            self._loadConfiguration()
         except Exception as e:
+            self._IsConnected = False
             print(e)
             return False
         return True
@@ -76,10 +88,10 @@ class LcardE2010B_EmptyDevice(object):
             print("ldev.CloseLDevice call")
             self.ldev.CloseLDevice()
             print("Lcard disconnected")
-        self.IsConnected = False
+        self._IsConnected = False
         return
     
-    def loadConfiguration(self):
+    def _loadConfiguration(self):
         if not(self.IsConnected):
             return
         f = open(self.ConfigFilename)

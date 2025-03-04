@@ -22,29 +22,47 @@ class Korad(Device):
         self.mutex = Lock()
         self.myData = pd.DataFrame(columns = ['time', 'U', 'I']) # unused
         # unused but left for compatability
+        self._IsActiveMeasurements = False
+
+    @property
+    def IsConnected(self):
+        return not(self.ser is None)
+    
+    @property
+    def IsActiveMeasurements(self):
+        if not(self.IsConnected):
+            self._IsActiveMeasurements = False
+        return self._IsActiveMeasurements
 
     def StartExperiment(self):
-        if self.ser is None:
+        if not(self.IsConnected):
             return
         print("Device_Korad.StartExperiment()")
         self.mutex.acquire()
         self.ser.write(f'OUT:1\r'.encode('ASCII'))
+        self._IsActiveMeasurements = True
         self.mutex.release()
         return
 
     def FinishExperiment(self):
-        if self.ser == None:
+        if not(self.IsConnected):
             return
         self.Set_v_i(0,0)
         self.mutex.acquire()
         self.ser.write(f'OUT:0\r'.encode('ASCII'))
+        self._IsActiveMeasurements = False
         self.mutex.release()
         return
     
     def TakeMeasurements(self):
-        if self.ser is None:
+        if not(self.IsConnected):
             time_sistem = time.time()
             print("Korad is not connected; tried Korad.TakeMeasurements()")
+            return pd.Series([time_sistem, None, None],index = KORAD_NAMES._member_map_.values())
+
+        if not(self.IsActiveMeasurements):
+            time_sistem = time.time()
+            print("Korad is connected, but not active; tried Korad.TakeMeasurements()")
             return pd.Series([time_sistem, None, None],index = KORAD_NAMES._member_map_.values())
 
         self.mutex.acquire()
@@ -58,9 +76,11 @@ class Korad(Device):
         return pd.Series([time_sistem, voltage, current],index = KORAD_NAMES._member_map_.values())
 
     def Set_v_i(self,v=None,i=None):
-        if self.ser == None:
+        if not(self.IsConnected):
             print("Korad is not connected; tried Korad.Set_v_i()")
             return
+        elif not(self.IsAciveMeasurements):
+            print("Korad is connected, but not active; tried Korad.Set_v_i()")
         else:
             self.mutex.acquire()
             if v!=None:
@@ -70,8 +90,8 @@ class Korad(Device):
             self.mutex.release()
 
     def ConnectToPhysicalDevice(self):
-        config_dict = self.LoadConfiguration()
         try:
+            config_dict = self.LoadConfiguration()
             self.ser = serial.Serial(config_dict['com port'],
                             config_dict['bits per second'],
                             timeout=1,
@@ -81,6 +101,7 @@ class Korad(Device):
                             rtscts=config_dict['rtscts'],
                             bytesize=config_dict['data bits'])
         except Exception as e:
+            print("Try connect Korad:", e)
             self.ser = None
             return False
         return True 
