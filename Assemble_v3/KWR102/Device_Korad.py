@@ -43,7 +43,9 @@ class Korad(Device):
         self.mutex.acquire()
         #self.ser.write(b'\r')
         self.ser.write(b'VOUT?\r')
-        voltage = float(self.ser.readline().decode()[:-1])
+        str_voltage = self.ser.readline().decode()[:-1]
+        print("*"+str_voltage+"*")
+        voltage = float(str_voltage)
         self.ser.write(b'IOUT?\r')
         current = float(self.ser.readline().decode()[:-1])
         self.mutex.release()
@@ -112,7 +114,7 @@ if __name__ == "__main__":
     myKorad.ConnectToPhysicalDevice()
     myKorad.StartExperiment()
     print(myKorad.TakeMeasurements())
-    myKorad.Set_v_i(1, None)
+    myKorad.Set_v_i(1.5, None)
     #print(time.time())
     #for i in range(1000):
     #    v = myKorad.TakeMeasurements()

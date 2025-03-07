@@ -1,8 +1,8 @@
 import serial
 import time
-ser = serial.Serial("COM3",9600,timeout=1,stopbits=1)
+ser = serial.Serial("COM5",9600,timeout=1,stopbits=1)
 ser.write(f'VSET:1.0\r'.encode('ASCII'))
-ser.write(f'OUT:0'.encode('ASCII'))
+ser.write(f'OUT:1'.encode('ASCII'))
 ser.write(b'VOUT?\r')
 print(ser.readline().decode())
 ser.write(b'IOUT?\r')
